@@ -3,12 +3,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 
-// Note that the value of these attributes are used for
-// testing the ApplicationInfo class.
 [assembly: AssemblyTitle("Cesto.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
 [assembly: AssemblyProduct("Cesto.Tests")]
 [assembly: AssemblyCopyright("Copyright © Microsoft 2013")]
 [assembly: AssemblyTrademark("")]
