@@ -41,6 +41,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DisposableAction.cs" />
+    <Compile Include="DisposableExtensions.cs" />
+    <Compile Include="WinForms\DisplaySetting.cs" />
+    <Compile Include="WinForms\DisplaySettingsExtensions\DisplaySettingDoubleExtensions.cs" />
+    <Compile Include="WinForms\DisplaySettingsExtensions\DisplaySettingInt32Extensions.cs" />
+    <Compile Include="WinForms\DisplaySettingsExtensions\DisplaySettingsBooleanExtensions.cs" />
+    <Compile Include="WinForms\DisplaySettingsExtensions\DisplaySettingsDateTimeExtensions.cs" />
+    <Compile Include="WinForms\DisplaySettingsExtensions\DisplaySettingsDecimalExtensions.cs" />
+    <Compile Include="WinForms\DisplaySettingsExtensions\DisplaySettingsSingleExtensions.cs" />
+    <Compile Include="WinForms\DisplaySettingsExtensions\DisplaySettingsStringExtensions.cs" />
     <Compile Include="WinForms\RegistryUtils.cs" />
     <Compile Include="Verify.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

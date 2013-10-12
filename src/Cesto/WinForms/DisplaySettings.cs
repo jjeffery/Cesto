@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
-using System.Text;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
@@ -13,20 +12,52 @@ namespace Cesto.WinForms
 	///     form sizes and positions.
 	/// </summary>
 	/// <remarks>
-	///     There are many published solutions to this problem, and many of them
-	///     are significantly more sophisticated than this one. In particular, this
-	///     implementation makes use of the Windows Registry, which might change
-	///     in a future version.
+	///     <para>
+	///         There are many published solutions to this problem, and many of them
+	///         are significantly more sophisticated than this one. In particular, this
+	///         implementation makes use of the Windows Registry
+	///     </para>
+	///     <para>
+	///         Each <c>DisplaySetting</c> object reads and writes to a registry key
+	///         under HKEY_CURRENT_USER. The path of the key is determined by:
+	///         <list type="number">
+	///             <item>
+	///                 <description>
+	///                     Obtain the base path from <see cref="RegistryUtils.BasePath" />
+	///                 </description>
+	///             </item>
+	///             <item>
+	///                 <description>
+	///                     Append the key name in <see cref="BaseName" />
+	///                 </description>
+	///             </item>
+	///             <item>
+	///                 <description>
+	///                     Append the <see cref="DisplaySettings.Name" />
+	///                 </description>
+	///             </item>
+	///         </list>
+	///     </para>
 	/// </remarks>
-	public class DisplaySettings
+	public class DisplaySettings : IDisposable
 	{
-		private const string DisplaySettingsKeyName = "DisplaySettings";
+		/// <summary>
+		///     Name of the registry Key under which all other display setting keys are stored.
+		///     Normally there is not need to change this field.
+		/// </summary>
+		public static string BaseName = "DisplaySettings";
 
 		private readonly string _name;
 		private RegistryKey _key;
 		private readonly Form _form;
 
-
+		/// <summary>
+		///     This field only makes sense if the <c>DisplaySettings</c> object was constructed
+		///     with a <see cref="Form" />. Specifies whether the form's size and position should
+		///     be auto-loaded and auto-saved. Defaults to <c>true</c>. Only change this if for
+		///     some reason you do not want to save and record the size and position of your form.
+		/// </summary>
+		public bool AutoSaveFormPosition = true;
 
 		/// <summary>
 		///     Deletes the entire display settings tree for all forms. Useful for testing.
@@ -40,44 +71,80 @@ namespace Cesto.WinForms
 
 		#region Construction, disposal
 
+		/// <summary>
+		///     Create a <see cref="DisplaySettings" /> object with the specified name.
+		/// </summary>
+		/// <param name="name">Name of the Registry key where settings will be stored.</param>
 		public DisplaySettings(string name)
 		{
-			name = (name ?? String.Empty).Trim();
-			if (String.IsNullOrEmpty(name))
+			_name = Verify.ArgumentNotNull(name, "name").Trim();
+			if (_name.Length == 0)
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentException("name cannot be blank", "name");
 			}
 
-			string keyPath = BuildRegistryKeyPath(name);
+			string keyPath = BuildRegistryKeyPath(_name);
 			_key = Registry.CurrentUser.CreateSubKey(keyPath);
-			_name = name;
 		}
 
+		/// <summary>
+		///     Create a <see cref="DisplaySettings" /> object named after a <see cref="Type" />.
+		/// </summary>
+		/// <param name="type">
+		///     The name of the <see cref="DisplaySettings" /> object will be obtained from <see cref="Type.FullName" />.
+		/// </param>
 		public DisplaySettings(Type type)
 			: this(type.FullName)
+		{}
+
+		/// <summary>
+		///     Create a <see cref="DisplaySettings" /> object for a <see cref="Component" />. This object will be disposed
+		///     when the <c>Component</c> object is disposed. Note that a <c>Component</c> can be a Windows Form
+		///     <see cref="Control" />.
+		/// </summary>
+		/// <param name="component">
+		///     The <see cref="Component" />, which is typically a Windows Form <see cref="Control" />.
+		/// </param>
+		/// <param name="name">
+		///     Optional name. If not specified, is determined from the full type name of the <paramref name="component" />.
+		/// </param>
+		public DisplaySettings(Component component, string name = null) : this(name ?? GetNameFromComponent(component))
 		{
+			Verify.ArgumentNotNull(component, "component");
+			this.DisposeWith(component);
 		}
 
-		public DisplaySettings(Form form, string name)
-			: this(name)
+		private static string GetNameFromComponent(Component component)
 		{
-			if (form == null)
-				throw new ArgumentNullException();
+			Verify.ArgumentNotNull(component, "component");
+			return component.GetType().FullName;
+		}
 
-			_form = form;
+		/// <summary>
+		///     Create a <see cref="DisplaySettings" /> object for a Windows Forms <see cref="Form" />.
+		///     Will remember the size and position of the form automatically.
+		/// </summary>
+		/// <param name="form">
+		///     The Windows Forms <see cref="Form" />
+		/// </param>
+		/// <param name="name">
+		///     Optional name for the <see cref="DisplaySettings" /> object.
+		///     If not specified, the name will be based on the full type name of <paramref name="form" />.
+		/// </param>
+		public DisplaySettings(Form form, string name = null) : this((Component) form, name)
+		{
+			_form = Verify.ArgumentNotNull(form, "form");
 			_form.Load += HandleFormLoad;
 			_form.FormClosed += HandleFormClosed;
 		}
 
-		public DisplaySettings(Form form)
-			: this(form, form.Name)
-		{
-		}
-
 		public void Dispose()
 		{
-			_key.Close();
-			_key = null;
+			if (_key != null)
+			{
+				_key.Close();
+				_key = null;
+			}
 		}
 
 		private void CheckDisposed()
@@ -90,19 +157,44 @@ namespace Cesto.WinForms
 
 		#endregion
 
+		/// <summary>
+		///     Name of the registry key where this object saves its settings.
+		/// </summary>
+		public string Name
+		{
+			get { return _name; }
+		}
+
 		private void HandleFormClosed(object sender, FormClosedEventArgs e)
 		{
-			SavePosition(_form);
-			Dispose();
+			if (AutoSaveFormPosition)
+			{
+				SaveFormPosition();
+			}
 		}
 
 		private void HandleFormLoad(object sender, EventArgs e)
 		{
-			LoadPosition(_form);
+			if (AutoSaveFormPosition)
+			{
+				LoadFormPosition();
+			}
 		}
 
-		public void LoadPosition(Form form)
+		/// <summary>
+		///     This method only does something if the <c>DisplaySettings</c> was created with a <see cref="Form" />.
+		///     Loads the form position and size from the <c>DisplaySettings</c>.
+		/// </summary>
+		/// <remarks>
+		///     There is usually no need to call this method, as it is automatically called if <see cref="AutoSaveFormPosition" /> is <c>true</c>.
+		/// </remarks>
+		public void LoadFormPosition()
 		{
+			if (_form == null)
+			{
+				return;
+			}
+
 			CheckDisposed();
 
 			object windowStateObject = _key.GetValue("WindowState");
@@ -116,12 +208,34 @@ namespace Cesto.WinForms
 
 			if (GetLocation(xObject, yObject, out location) && GetSize(widthObject, heightObject, out size))
 			{
-				form.DesktopBounds = new Rectangle(location, size);
+				_form.DesktopBounds = new Rectangle(location, size);
 			}
 
 			if (windowStateObject != null)
 			{
-				form.WindowState = (FormWindowState) (windowStateObject);
+				try
+				{
+					var intValue = Convert.ToInt32(windowStateObject);
+					switch (intValue)
+					{
+						case (int) FormWindowState.Maximized:
+						case (int) FormWindowState.Normal:
+							_form.WindowState = (FormWindowState) intValue;
+							break;
+
+							// Note how minimized is not restored. If a program was closed
+							// when the form was minimized, we want to see it restored.
+						default:
+							_form.WindowState = FormWindowState.Normal;
+							break;
+					}
+				}
+				catch (FormatException)
+				{}
+				catch (OverflowException)
+				{}
+				catch (InvalidCastException)
+				{}
 			}
 		}
 
@@ -131,7 +245,7 @@ namespace Cesto.WinForms
 			{
 				if (x != null && y != null)
 				{
-					location = new Point((int) x, (int) y);
+					location = new Point(Convert.ToInt32(x), Convert.ToInt32(y));
 
 					// check that the location fits on one of the available screens
 					foreach (Screen screen in Screen.AllScreens)
@@ -143,11 +257,14 @@ namespace Cesto.WinForms
 					}
 				}
 			}
+			catch (FormatException)
+			{}
+			catch (OverflowException)
+			{}
 			catch (InvalidCastException)
-			{
-			}
+			{}
 
-			location = new Point();
+			location = Point.Empty;
 			return false;
 		}
 
@@ -157,38 +274,59 @@ namespace Cesto.WinForms
 			{
 				if (width != null && height != null)
 				{
-					size = new Size((int) width, (int) height);
-					return true;
+					size = new Size(Convert.ToInt32(width), Convert.ToInt32(height));
+
+					// Don't return a size if it is too small to see. The choice of minimum
+					// size is a bit arbitrary.
+					if (size.Width >= 50 && size.Height >= 50)
+					{
+						return true;
+					}
 				}
 			}
+			catch (FormatException)
+			{}
+			catch (OverflowException)
+			{}
 			catch (InvalidCastException)
-			{
-			}
+			{}
 
-			size = new Size();
+			size = Size.Empty;
 			return false;
 		}
 
 		private static string BuildRegistryKeyPath(string formName)
 		{
-			return RegistryUtils.SubKeyPath(DisplaySettingsKeyName, formName);
+			return RegistryUtils.SubKeyPath(BaseName, formName);
 		}
 
-		public void SavePosition(Form form)
+		/// <summary>
+		///     This method only does something if the <c>DisplaySettings</c> was created with a <see cref="Form" />.
+		///     Saves the form position and size to the <c>DisplaySettings</c>.
+		/// </summary>
+		/// <remarks>
+		///     There is usually no need to call this method, as it is automatically called if <see cref="AutoSaveFormPosition" /> is <c>true</c>.
+		/// </remarks>
+		public void SaveFormPosition()
 		{
+			if (_form == null)
+			{
+				return;
+			}
+
 			CheckDisposed();
 
-			_key.SetValue("WindowState", (int) form.WindowState);
-			_key.SetValue("DesktopBounds.Y", form.DesktopBounds.Y);
-			_key.SetValue("DesktopBounds.X", form.DesktopBounds.X);
-			_key.SetValue("DesktopBounds.Width", form.DesktopBounds.Width);
-			_key.SetValue("DesktopBounds.Height", form.DesktopBounds.Height);
+			_key.SetValue("WindowState", (int) _form.WindowState);
+			_key.SetValue("DesktopBounds.Y", _form.DesktopBounds.Y);
+			_key.SetValue("DesktopBounds.X", _form.DesktopBounds.X);
+			_key.SetValue("DesktopBounds.Width", _form.DesktopBounds.Width);
+			_key.SetValue("DesktopBounds.Height", _form.DesktopBounds.Height);
 		}
 
 		public string GetString(string valueName, string defaultValue)
 		{
 			CheckDisposed();
-			return (string) _key.GetValue(valueName, defaultValue);
+			return Convert.ToString(_key.GetValue(valueName, defaultValue));
 		}
 
 		public void SetString(string valueName, string value)
@@ -204,16 +342,10 @@ namespace Cesto.WinForms
 			}
 		}
 
-		public void SetInt(string valueName, int value)
+		public int GetInt32(string valueName, int defaultValue)
 		{
 			CheckDisposed();
-			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
-		}
-
-		public int GetInt(string valueName, int defaultValue)
-		{
-			CheckDisposed();
-			string s = GetString(valueName, null);
+			var s = GetString(valueName, null);
 			if (s == null)
 			{
 				return defaultValue;
@@ -227,247 +359,72 @@ namespace Cesto.WinForms
 			return value;
 		}
 
+		public void SetInt32(string valueName, int value)
+		{
+			CheckDisposed();
+			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
+		}
+
+		public decimal GetDecimal(string valueName, decimal defaultValue)
+		{
+			CheckDisposed();
+			var s = GetString(valueName, null);
+			if (s == null)
+			{
+				return defaultValue;
+			}
+
+			decimal value;
+			if (!decimal.TryParse(s, out value))
+			{
+				value = defaultValue;
+			}
+			return value;
+		}
+
+		public void SetDecimal(string valueName, decimal value)
+		{
+			CheckDisposed();
+			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
+		}
+
+		public bool GetBoolean(string valueName, bool defaultValue)
+		{
+			CheckDisposed();
+			var s = GetString(valueName, null);
+			if (s == null)
+			{
+				return defaultValue;
+			}
+
+			bool value;
+			if (!bool.TryParse(s, out value))
+			{
+				// have another go at converting to an integer
+				int intValue;
+				if (int.TryParse(s, out intValue))
+				{
+					value = intValue != 0;
+				}
+				else
+				{
+					value = defaultValue;	
+				}
+			}
+
+			return value;
+		}
+
+		public void SetBoolean(string valueName, bool value)
+		{
+			CheckDisposed();
+			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
+		}
+
 		public void Remove(string valueName)
 		{
 			CheckDisposed();
 			_key.DeleteValue(valueName, false);
 		}
-
-		public DisplaySetting<string> StringSetting(string name, string defaultValue)
-		{
-			return new DisplaySettingString(this, name, defaultValue);
-		}
-
-		public DisplaySetting<int> Int32Setting(string name, int defaultValue)
-		{
-			return new DisplaySettingInt32(this, name, defaultValue);
-		}
-
-		public DisplaySetting<bool> BooleanSetting(string name, bool defaultValue)
-		{
-			return new DisplaySettingBoolean(this, name, defaultValue);
-		}
-
-		public DisplaySetting<double> DoubleSetting(string name, double defaultValue)
-		{
-			return new DisplaySettingDouble(this, name, defaultValue);
-		}
-
-		public DisplaySetting<float> SingleSetting(string name, float defaultValue)
-		{
-			return new DisplaySettingSingle(this, name, defaultValue);
-		}
-
-		public DisplaySetting<DateTime> DateTimeSetting(string name, DateTime defaultValue)
-		{
-			return new DisplaySettingDateTime(this, name, defaultValue);
-		}
-
-		#region Subclasses of DisplaySetting<T>
-
-		private class DisplaySettingString : DisplaySetting<string>
-		{
-			public DisplaySettingString(DisplaySettings displaySettings, string name, string defaultValue)
-				: base(displaySettings, name, defaultValue)
-			{
-			}
-
-			public override string GetValue()
-			{
-				return DisplaySettings.GetString(Name, DefaultValue);
-			}
-
-			public override void SetValue(string value)
-			{
-				DisplaySettings.SetString(Name, value);
-			}
-		}
-
-		private class DisplaySettingInt32 : DisplaySetting<int>
-		{
-			public DisplaySettingInt32(DisplaySettings displaySettings, string name, int defaultValue)
-				: base(displaySettings, name, defaultValue)
-			{
-			}
-
-			public override int GetValue()
-			{
-				return DisplaySettings.GetInt(Name, DefaultValue);
-			}
-
-			public override void SetValue(int value)
-			{
-				DisplaySettings.SetInt(Name, value);
-			}
-		}
-
-		private class DisplaySettingBoolean : DisplaySetting<bool>
-		{
-			public DisplaySettingBoolean(DisplaySettings displaySettings, string name, bool defaultValue)
-				: base(displaySettings, name, defaultValue)
-			{
-			}
-
-			public override bool GetValue()
-			{
-				var intDefault = DefaultValue ? 1 : 0;
-				var intValue = DisplaySettings.GetInt(Name, intDefault);
-				return intValue != 0;
-			}
-
-			public override void SetValue(bool value)
-			{
-				var intValue = value ? 1 : 0;
-				DisplaySettings.SetInt(Name, intValue);
-			}
-		}
-
-		private class DisplaySettingDouble : DisplaySetting<double>
-		{
-			public DisplaySettingDouble(DisplaySettings displaySettings, string name, double defaultValue)
-				: base(displaySettings, name, defaultValue)
-			{
-			}
-
-			public override double GetValue()
-			{
-				var stringValue = DisplaySettings.GetString(Name, null);
-				if (string.IsNullOrWhiteSpace(stringValue))
-				{
-					return DefaultValue;
-				}
-
-				double value;
-				if (!double.TryParse(stringValue, out value))
-				{
-					return DefaultValue;
-				}
-
-				return value;
-			}
-
-			public override void SetValue(double value)
-			{
-				// Comparison of floating point with equality, the default value is probably going to be zero,
-				// which compares exactly. If not compared exactly, it does not matter much here.
-				// ReSharper disable CompareOfFloatsByEqualityOperator
-				if (value == DefaultValue)
-					// ReSharper restore CompareOfFloatsByEqualityOperator
-				{
-					DisplaySettings.SetString(Name, null);
-				}
-				else
-				{
-					DisplaySettings.SetString(Name, value.ToString(CultureInfo.InvariantCulture));
-				}
-			}
-		}
-
-		private class DisplaySettingSingle : DisplaySetting<float>
-		{
-			public DisplaySettingSingle(DisplaySettings displaySettings, string name, float defaultValue)
-				: base(displaySettings, name, defaultValue)
-			{
-			}
-
-			public override float GetValue()
-			{
-				var stringValue = DisplaySettings.GetString(Name, null);
-				if (string.IsNullOrWhiteSpace(stringValue))
-				{
-					return DefaultValue;
-				}
-
-				float value;
-				if (!float.TryParse(stringValue, out value))
-				{
-					return DefaultValue;
-				}
-
-				return value;
-			}
-
-			public override void SetValue(float value)
-			{
-				// Comparison of floating point with equality, the default value is probably going to be zero,
-				// which compares exactly. If not compared exactly, it does not matter much here.
-				// ReSharper disable CompareOfFloatsByEqualityOperator
-				if (value == DefaultValue)
-					// ReSharper restore CompareOfFloatsByEqualityOperator
-				{
-					DisplaySettings.SetString(Name, null);
-				}
-				else
-				{
-					DisplaySettings.SetString(Name, value.ToString(CultureInfo.InvariantCulture));
-				}
-			}
-		}
-
-		private class DisplaySettingDateTime : DisplaySetting<DateTime>
-		{
-			public DisplaySettingDateTime(DisplaySettings displaySettings, string name, DateTime defaultValue)
-				: base(displaySettings, name, defaultValue)
-			{
-			}
-
-			public override DateTime GetValue()
-			{
-				var stringValue = DisplaySettings.GetString(Name, null);
-				if (string.IsNullOrWhiteSpace(stringValue))
-				{
-					return DefaultValue;
-				}
-
-				DateTime value;
-				if (!DateTime.TryParse(stringValue, out value))
-				{
-					return DefaultValue;
-				}
-
-				return value;
-			}
-
-			public override void SetValue(DateTime value)
-			{
-				if (value == DefaultValue)
-				{
-					DisplaySettings.SetString(Name, null);
-				}
-				else
-				{
-					string stringValue;
-					if (value.Hour == 0 && value.Minute == 0 && value.Second == 0 && value.Millisecond == 0)
-					{
-						// Just a date
-						stringValue = value.ToString("yyyy-MM-dd");
-					}
-					else
-					{
-						stringValue = value.ToString("yyyy-MM-dd HH:mm:ss.fffff");
-					}
-					DisplaySettings.SetString(Name, stringValue);
-				}
-			}
-		}
-
-		#endregion
-	}
-
-	public abstract class DisplaySetting<T>
-	{
-		protected readonly DisplaySettings DisplaySettings;
-		protected readonly string Name;
-		protected readonly T DefaultValue;
-
-		protected DisplaySetting(DisplaySettings displaySettings, string name, T defaultValue)
-		{
-			DisplaySettings = Verify.ArgumentNotNull(displaySettings, "displaySettings");
-			Name = Verify.ArgumentNotNull(name, "name");
-			DefaultValue = defaultValue;
-		}
-
-		public abstract T GetValue();
-		public abstract void SetValue(T value);
 	}
 }
