@@ -1,4 +1,5 @@
-﻿namespace Cesto.WinForms
+﻿// ReSharper disable CheckNamespace
+namespace Cesto.WinForms
 {
 	public static class DisplaySettingsInt32Extensions
 	{

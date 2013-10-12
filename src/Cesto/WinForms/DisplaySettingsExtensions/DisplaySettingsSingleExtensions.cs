@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-
+﻿// ReSharper disable CheckNamespace
 namespace Cesto.WinForms
 {
 	public static class DisplaySettingsSingleExtensions
@@ -20,19 +19,7 @@ namespace Cesto.WinForms
 
 			public override float GetValue()
 			{
-				var stringValue = DisplaySettings.GetString(Name, null);
-				if (string.IsNullOrWhiteSpace(stringValue))
-				{
-					return DefaultValue;
-				}
-
-				float value;
-				if (!float.TryParse(stringValue, out value))
-				{
-					return DefaultValue;
-				}
-
-				return value;
+				return DisplaySettings.GetSingle(Name, DefaultValue);
 			}
 
 			public override void SetValue(float value)
@@ -41,14 +28,14 @@ namespace Cesto.WinForms
 				// which compares exactly. If not compared exactly, it does not matter much here.
 				// ReSharper disable CompareOfFloatsByEqualityOperator
 				if (value == DefaultValue)
-					// ReSharper restore CompareOfFloatsByEqualityOperator
 				{
 					DisplaySettings.Remove(Name);
 				}
 				else
 				{
-					DisplaySettings.SetString(Name, value.ToString(CultureInfo.InvariantCulture));
+					DisplaySettings.SetDouble(Name, value);
 				}
+				// ReSharper restore CompareOfFloatsByEqualityOperator
 			}
 		}
 	}

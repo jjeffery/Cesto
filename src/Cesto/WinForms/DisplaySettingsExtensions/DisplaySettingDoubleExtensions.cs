@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-
+﻿// ReSharper disable CheckNamespace
 namespace Cesto.WinForms
 {
 	public static class DisplaySettingsDoubleExtensions
@@ -20,19 +19,7 @@ namespace Cesto.WinForms
 
 			public override double GetValue()
 			{
-				var stringValue = DisplaySettings.GetString(Name, null);
-				if (string.IsNullOrWhiteSpace(stringValue))
-				{
-					return DefaultValue;
-				}
-
-				double value;
-				if (!double.TryParse(stringValue, out value))
-				{
-					return DefaultValue;
-				}
-
-				return value;
+				return DisplaySettings.GetDouble(Name, DefaultValue);
 			}
 
 			public override void SetValue(double value)
@@ -46,7 +33,7 @@ namespace Cesto.WinForms
 				}
 				else
 				{
-					DisplaySettings.SetString(Name, value.ToString(CultureInfo.InvariantCulture));
+					DisplaySettings.SetDouble(Name, value);
 				}
 				// ReSharper restore CompareOfFloatsByEqualityOperator
 			}

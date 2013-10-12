@@ -1,5 +1,6 @@
 ﻿using System;
 
+// ReSharper disable CheckNamespace
 namespace Cesto.WinForms
 {
 	public static class DisplaySettingsDateTimeExtenstions

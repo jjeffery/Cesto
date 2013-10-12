@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-
+﻿// ReSharper disable CheckNamespace
 namespace Cesto.WinForms
 {
 	public static class DisplaySettingsDecimalExtensions
@@ -20,19 +19,7 @@ namespace Cesto.WinForms
 
 			public override decimal GetValue()
 			{
-				var stringValue = DisplaySettings.GetString(Name, null);
-				if (string.IsNullOrWhiteSpace(stringValue))
-				{
-					return DefaultValue;
-				}
-
-				decimal value;
-				if (!decimal.TryParse(stringValue, out value))
-				{
-					return DefaultValue;
-				}
-
-				return value;
+				return DisplaySettings.GetDecimal(Name, DefaultValue);
 			}
 
 			public override void SetValue(decimal value)
@@ -45,7 +32,7 @@ namespace Cesto.WinForms
 				}
 				else
 				{
-					DisplaySettings.SetString(Name, value.ToString(CultureInfo.InvariantCulture));
+					DisplaySettings.SetDecimal(Name, value);
 				}
 			}
 		}

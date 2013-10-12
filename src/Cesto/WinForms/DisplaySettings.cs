@@ -93,8 +93,7 @@ namespace Cesto.WinForms
 		/// <param name="type">
 		///     The name of the <see cref="DisplaySettings" /> object will be obtained from <see cref="Type.FullName" />.
 		/// </param>
-		public DisplaySettings(Type type)
-			: this(type.FullName)
+		public DisplaySettings(Type type) : this(type.FullName)
 		{}
 
 		/// <summary>
@@ -169,7 +168,7 @@ namespace Cesto.WinForms
 		{
 			if (AutoSaveFormPosition)
 			{
-				SaveFormPosition();
+				SetFormPosition(null, _form);
 			}
 		}
 
@@ -177,7 +176,7 @@ namespace Cesto.WinForms
 		{
 			if (AutoSaveFormPosition)
 			{
-				LoadFormPosition();
+				GetFormPosition(null, _form);
 			}
 		}
 
@@ -188,27 +187,23 @@ namespace Cesto.WinForms
 		/// <remarks>
 		///     There is usually no need to call this method, as it is automatically called if <see cref="AutoSaveFormPosition" /> is <c>true</c>.
 		/// </remarks>
-		public void LoadFormPosition()
+		public void GetFormPosition(string valueName, Form form)
 		{
-			if (_form == null)
-			{
-				return;
-			}
-
 			CheckDisposed();
+			Verify.ArgumentNotNull(form, "form");
 
-			object windowStateObject = _key.GetValue("WindowState");
-			object xObject = _key.GetValue("DesktopBounds.X");
-			object yObject = _key.GetValue("DesktopBounds.Y");
-			object widthObject = _key.GetValue("DesktopBounds.Width");
-			object heightObject = _key.GetValue("DesktopBounds.Height");
+			object windowStateObject = _key.GetValue(GetValueName(valueName, "WindowState"));
+			object xObject = _key.GetValue(GetValueName(valueName, "DesktopBounds.X"));
+			object yObject = _key.GetValue(GetValueName(valueName, "DesktopBounds.Y"));
+			object widthObject = _key.GetValue(GetValueName(valueName, "DesktopBounds.Width"));
+			object heightObject = _key.GetValue(GetValueName(valueName, "DesktopBounds.Height"));
 
 			Point location;
 			Size size;
 
 			if (GetLocation(xObject, yObject, out location) && GetSize(widthObject, heightObject, out size))
 			{
-				_form.DesktopBounds = new Rectangle(location, size);
+				form.DesktopBounds = new Rectangle(location, size);
 			}
 
 			if (windowStateObject != null)
@@ -220,13 +215,13 @@ namespace Cesto.WinForms
 					{
 						case (int) FormWindowState.Maximized:
 						case (int) FormWindowState.Normal:
-							_form.WindowState = (FormWindowState) intValue;
+							form.WindowState = (FormWindowState) intValue;
 							break;
 
 							// Note how minimized is not restored. If a program was closed
 							// when the form was minimized, we want to see it restored.
 						default:
-							_form.WindowState = FormWindowState.Normal;
+							form.WindowState = FormWindowState.Normal;
 							break;
 					}
 				}
@@ -301,14 +296,15 @@ namespace Cesto.WinForms
 		}
 
 		/// <summary>
-		///     This method only does something if the <c>DisplaySettings</c> was created with a <see cref="Form" />.
 		///     Saves the form position and size to the <c>DisplaySettings</c>.
 		/// </summary>
 		/// <remarks>
-		///     There is usually no need to call this method, as it is automatically called if <see cref="AutoSaveFormPosition" /> is <c>true</c>.
+		///     There is usually no need to call this method, if the <c>DisplaySettings</c> object is constructed with
+		///		a <see cref="Form"/> and <see cref="AutoSaveFormPosition" /> is <c>true</c>.
 		/// </remarks>
-		public void SaveFormPosition()
+		public void SetFormPosition(string valueName, Form form)
 		{
+
 			if (_form == null)
 			{
 				return;
@@ -316,11 +312,21 @@ namespace Cesto.WinForms
 
 			CheckDisposed();
 
-			_key.SetValue("WindowState", (int) _form.WindowState);
-			_key.SetValue("DesktopBounds.Y", _form.DesktopBounds.Y);
-			_key.SetValue("DesktopBounds.X", _form.DesktopBounds.X);
-			_key.SetValue("DesktopBounds.Width", _form.DesktopBounds.Width);
-			_key.SetValue("DesktopBounds.Height", _form.DesktopBounds.Height);
+			_key.SetValue(GetValueName(valueName, "WindowState"), (int) _form.WindowState);
+			_key.SetValue(GetValueName(valueName, "DesktopBounds.Y"), _form.DesktopBounds.Y);
+			_key.SetValue(GetValueName(valueName, "DesktopBounds.X"), _form.DesktopBounds.X);
+			_key.SetValue(GetValueName(valueName, "DesktopBounds.Width"), _form.DesktopBounds.Width);
+			_key.SetValue(GetValueName(valueName, "DesktopBounds.Height"), _form.DesktopBounds.Height);
+		}
+
+		private static string GetValueName(string prefix, string suffix)
+		{
+			if (string.IsNullOrWhiteSpace(prefix))
+			{
+				return suffix;
+			}
+
+			return prefix + "." + suffix;
 		}
 
 		public string GetString(string valueName, string defaultValue)
@@ -416,6 +422,52 @@ namespace Cesto.WinForms
 		}
 
 		public void SetBoolean(string valueName, bool value)
+		{
+			CheckDisposed();
+			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
+		}
+
+		public float GetSingle(string valueName, float defaultValue)
+		{
+			CheckDisposed();
+			var s = GetString(valueName, null);
+			if (s == null)
+			{
+				return defaultValue;
+			}
+
+			float value;
+			if (!float.TryParse(s, out value))
+			{
+				value = defaultValue;
+			}
+			return value;
+		}
+
+		public void SetSingle(string valueName, float value)
+		{
+			CheckDisposed();
+			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
+		}
+
+		public double GetDouble(string valueName, double defaultValue)
+		{
+			CheckDisposed();
+			var s = GetString(valueName, null);
+			if (s == null)
+			{
+				return defaultValue;
+			}
+
+			double value;
+			if (!double.TryParse(s, out value))
+			{
+				value = defaultValue;
+			}
+			return value;
+		}
+
+		public void SetDouble(string valueName, double value)
 		{
 			CheckDisposed();
 			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
