@@ -1,9 +1,10 @@
 ﻿// ReSharper disable CheckNamespace
+
 namespace Cesto.WinForms
 {
 	public static class DisplaySettingsDoubleExtensions
 	{
-		public static DisplaySetting<double> SingleSetting(this DisplaySettings displaySettings, string name,
+		public static DisplaySetting<double> DoubleSetting(this DisplaySettings displaySettings, string name,
 		                                                   double defaultValue = 0.0)
 		{
 			Verify.ArgumentNotNull(displaySettings, "displaySettings");
@@ -29,7 +30,7 @@ namespace Cesto.WinForms
 				// ReSharper disable CompareOfFloatsByEqualityOperator
 				if (value == DefaultValue)
 				{
-					DisplaySettings.Remove(Name);
+					DisplaySettings.Delete(Name);
 				}
 				else
 				{

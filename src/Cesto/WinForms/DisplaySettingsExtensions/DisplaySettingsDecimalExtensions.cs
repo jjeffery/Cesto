@@ -28,7 +28,7 @@ namespace Cesto.WinForms
 				// which compares exactly. If not compared exactly, it does not matter much here.
 				if (value == DefaultValue)
 				{
-					DisplaySettings.Remove(Name);
+					DisplaySettings.Delete(Name);
 				}
 				else
 				{

@@ -4,7 +4,7 @@ namespace Cesto.WinForms
 	public static class DisplaySettingsSingleExtensions
 	{
 		public static DisplaySetting<float> SingleSetting(this DisplaySettings displaySettings, string name,
-		                                                  float defaultValue)
+		                                                  float defaultValue = 0)
 		{
 			Verify.ArgumentNotNull(displaySettings, "displaySettings");
 			return new DisplaySettingSingle(displaySettings, name, defaultValue);
@@ -29,7 +29,7 @@ namespace Cesto.WinForms
 				// ReSharper disable CompareOfFloatsByEqualityOperator
 				if (value == DefaultValue)
 				{
-					DisplaySettings.Remove(Name);
+					DisplaySettings.Delete(Name);
 				}
 				else
 				{

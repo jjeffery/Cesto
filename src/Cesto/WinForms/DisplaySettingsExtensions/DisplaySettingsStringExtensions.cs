@@ -24,7 +24,7 @@ namespace Cesto.WinForms
 			{
 				if (value == DefaultValue)
 				{
-					DisplaySettings.Remove(Name);
+					DisplaySettings.Delete(Name);
 				}
 				else
 				{

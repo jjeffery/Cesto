@@ -49,6 +49,7 @@
     <Compile Include="VerifyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WinForms\ApplicationInfoTests.cs" />
+    <Compile Include="WinForms\DisplaySettingsTests.cs" />
     <Compile Include="WinForms\RegistryUtilsTests.cs" />
   </ItemGroup>
   <ItemGroup>

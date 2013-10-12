@@ -41,12 +41,6 @@ namespace Cesto.WinForms
 	/// </remarks>
 	public class DisplaySettings : IDisposable
 	{
-		/// <summary>
-		///     Name of the registry Key under which all other display setting keys are stored.
-		///     Normally there is not need to change this field.
-		/// </summary>
-		public static string BaseName = "DisplaySettings";
-
 		private readonly string _name;
 		private RegistryKey _key;
 		private readonly Form _form;
@@ -60,13 +54,25 @@ namespace Cesto.WinForms
 		public bool AutoSaveFormPosition = true;
 
 		/// <summary>
-		///     Deletes the entire display settings tree for all forms. Useful for testing.
+		///     Name of the registry Key under which all other display setting keys are stored.
+		///     Normally there is not need to change this field.
 		/// </summary>
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public static void DeleteAll()
+		public static string BaseName = "DisplaySettings";
+
+		/// <summary>
+		///     Name of the registry key where this object saves its settings.
+		/// </summary>
+		public string Name
 		{
-			string keyPath = BuildRegistryKeyPath(null);
-			Registry.CurrentUser.DeleteSubKeyTree(keyPath);
+			get { return _name; }
+		}
+
+		/// <summary>
+		///     Has the object been disposed.
+		/// </summary>
+		public bool IsDisposed
+		{
+			get { return _key == null; }
 		}
 
 		#region Construction, disposal
@@ -113,12 +119,6 @@ namespace Cesto.WinForms
 			this.DisposeWith(component);
 		}
 
-		private static string GetNameFromComponent(Component component)
-		{
-			Verify.ArgumentNotNull(component, "component");
-			return component.GetType().FullName;
-		}
-
 		/// <summary>
 		///     Create a <see cref="DisplaySettings" /> object for a Windows Forms <see cref="Form" />.
 		///     Will remember the size and position of the form automatically.
@@ -146,38 +146,188 @@ namespace Cesto.WinForms
 			}
 		}
 
-		private void CheckDisposed()
-		{
-			if (_key == null)
-			{
-				throw new ObjectDisposedException(_name);
-			}
-		}
-
 		#endregion
 
-		/// <summary>
-		///     Name of the registry key where this object saves its settings.
-		/// </summary>
-		public string Name
+		public string GetString(string valueName, string defaultValue = null)
 		{
-			get { return _name; }
+			CheckDisposed();
+			object value = _key.GetValue(valueName, defaultValue);
+			if (value == null)
+			{
+				return null;
+			}
+			return value.ToString();
 		}
 
-		private void HandleFormClosed(object sender, FormClosedEventArgs e)
+		public void SetString(string valueName, string value)
 		{
-			if (AutoSaveFormPosition)
+			CheckDisposed();
+			if (value == null)
 			{
-				SetFormPosition(null, _form);
+				_key.DeleteValue(valueName);
+			}
+			else
+			{
+				_key.SetValue(valueName, value);
 			}
 		}
 
-		private void HandleFormLoad(object sender, EventArgs e)
+		public int GetInt32(string valueName, int defaultValue = 0)
 		{
-			if (AutoSaveFormPosition)
+			CheckDisposed();
+			var s = GetString(valueName);
+			if (s == null)
 			{
-				GetFormPosition(null, _form);
+				return defaultValue;
 			}
+
+			int value;
+			if (!Int32.TryParse(s, out value))
+			{
+				value = defaultValue;
+			}
+			return value;
+		}
+
+		public void SetInt32(string valueName, int value)
+		{
+			CheckDisposed();
+			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
+		}
+
+		public decimal GetDecimal(string valueName, decimal defaultValue = 0.0m)
+		{
+			CheckDisposed();
+			var s = GetString(valueName);
+			if (s == null)
+			{
+				return defaultValue;
+			}
+
+			decimal value;
+			if (!decimal.TryParse(s, out value))
+			{
+				value = defaultValue;
+			}
+			return value;
+		}
+
+		public void SetDecimal(string valueName, decimal value)
+		{
+			CheckDisposed();
+			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
+		}
+
+		public bool GetBoolean(string valueName, bool defaultValue = false)
+		{
+			CheckDisposed();
+			var s = GetString(valueName);
+			if (s == null)
+			{
+				return defaultValue;
+			}
+
+			bool value;
+			if (!bool.TryParse(s, out value))
+			{
+				// have another go at converting to an integer
+				int intValue;
+				if (int.TryParse(s, out intValue))
+				{
+					value = intValue != 0;
+				}
+				else
+				{
+					value = defaultValue;
+				}
+			}
+
+			return value;
+		}
+
+		public void SetBoolean(string valueName, bool value)
+		{
+			CheckDisposed();
+			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
+		}
+
+		public float GetSingle(string valueName, float defaultValue = 0.0f)
+		{
+			CheckDisposed();
+			var s = GetString(valueName);
+			if (s == null)
+			{
+				return defaultValue;
+			}
+
+			float value;
+			if (!float.TryParse(s, out value))
+			{
+				value = defaultValue;
+			}
+			return value;
+		}
+
+		public void SetSingle(string valueName, float value)
+		{
+			CheckDisposed();
+			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
+		}
+
+		public double GetDouble(string valueName, double defaultValue = 0.0)
+		{
+			CheckDisposed();
+			var s = GetString(valueName);
+			if (s == null)
+			{
+				return defaultValue;
+			}
+
+			double value;
+			if (!double.TryParse(s, out value))
+			{
+				value = defaultValue;
+			}
+			return value;
+		}
+
+		public DateTime GetDateTime(string valueName, DateTime defaultValue = default(DateTime))
+		{
+			var stringValue = GetString(valueName);
+			if (string.IsNullOrWhiteSpace(stringValue))
+			{
+				return defaultValue;
+			}
+
+			DateTime value;
+			if (!DateTime.TryParse(stringValue, out value))
+			{
+				return defaultValue;
+			}
+
+			return value;
+		}
+
+		public void SetDateTime(string valueName, DateTime value)
+		{
+			string stringValue;
+			if (value.Hour == 0 && value.Minute == 0 && value.Second == 0 && value.Millisecond == 0)
+			{
+				// Just a date
+				stringValue = value.ToString("yyyy-MM-dd");
+			}
+			else
+			{
+				stringValue = value.ToString("yyyy-MM-dd HH:mm:ss.fffff");
+			}
+			SetString(valueName, stringValue);
+
+		}
+
+		public void SetDouble(string valueName, double value)
+		{
+			CheckDisposed();
+			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
 		}
 
 		/// <summary>
@@ -232,6 +382,76 @@ namespace Cesto.WinForms
 				catch (InvalidCastException)
 				{}
 			}
+		}
+
+		/// <summary>
+		///     Saves the form position and size to the <c>DisplaySettings</c>.
+		/// </summary>
+		/// <remarks>
+		///     There is usually no need to call this method, if the <c>DisplaySettings</c> object is constructed with
+		///     a <see cref="Form" /> and <see cref="AutoSaveFormPosition" /> is <c>true</c>.
+		/// </remarks>
+		public void SetFormPosition(string valueName, Form form)
+		{
+			if (_form == null)
+			{
+				return;
+			}
+
+			CheckDisposed();
+
+			_key.SetValue(GetValueName(valueName, "WindowState"), (int) _form.WindowState);
+			_key.SetValue(GetValueName(valueName, "DesktopBounds.Y"), _form.DesktopBounds.Y);
+			_key.SetValue(GetValueName(valueName, "DesktopBounds.X"), _form.DesktopBounds.X);
+			_key.SetValue(GetValueName(valueName, "DesktopBounds.Width"), _form.DesktopBounds.Width);
+			_key.SetValue(GetValueName(valueName, "DesktopBounds.Height"), _form.DesktopBounds.Height);
+		}
+
+		public void Delete(string valueName)
+		{
+			CheckDisposed();
+			_key.DeleteValue(valueName, false);
+		}
+
+		/// <summary>
+		///     Deletes the entire display settings tree for all forms. Useful for testing.
+		/// </summary>
+		public void DeleteAll()
+		{
+			CheckDisposed();
+			foreach (var valueName in _key.GetValueNames())
+			{
+				_key.DeleteValue(valueName);
+			}
+		}
+
+		private void CheckDisposed()
+		{
+			if (_key == null)
+			{
+				throw new ObjectDisposedException(_name);
+			}
+		}
+
+		private static string GetNameFromComponent(Component component)
+		{
+			Verify.ArgumentNotNull(component, "component");
+			return component.GetType().FullName;
+		}
+
+		private static string GetValueName(string prefix, string suffix)
+		{
+			if (string.IsNullOrWhiteSpace(prefix))
+			{
+				return suffix;
+			}
+
+			return prefix + "." + suffix;
+		}
+
+		private static string BuildRegistryKeyPath(string formName)
+		{
+			return RegistryUtils.SubKeyPath(BaseName, formName);
 		}
 
 		private static bool GetLocation(object x, object y, out Point location)
@@ -290,193 +510,20 @@ namespace Cesto.WinForms
 			return false;
 		}
 
-		private static string BuildRegistryKeyPath(string formName)
+		private void HandleFormLoad(object sender, EventArgs e)
 		{
-			return RegistryUtils.SubKeyPath(BaseName, formName);
-		}
-
-		/// <summary>
-		///     Saves the form position and size to the <c>DisplaySettings</c>.
-		/// </summary>
-		/// <remarks>
-		///     There is usually no need to call this method, if the <c>DisplaySettings</c> object is constructed with
-		///		a <see cref="Form"/> and <see cref="AutoSaveFormPosition" /> is <c>true</c>.
-		/// </remarks>
-		public void SetFormPosition(string valueName, Form form)
-		{
-
-			if (_form == null)
+			if (AutoSaveFormPosition)
 			{
-				return;
-			}
-
-			CheckDisposed();
-
-			_key.SetValue(GetValueName(valueName, "WindowState"), (int) _form.WindowState);
-			_key.SetValue(GetValueName(valueName, "DesktopBounds.Y"), _form.DesktopBounds.Y);
-			_key.SetValue(GetValueName(valueName, "DesktopBounds.X"), _form.DesktopBounds.X);
-			_key.SetValue(GetValueName(valueName, "DesktopBounds.Width"), _form.DesktopBounds.Width);
-			_key.SetValue(GetValueName(valueName, "DesktopBounds.Height"), _form.DesktopBounds.Height);
-		}
-
-		private static string GetValueName(string prefix, string suffix)
-		{
-			if (string.IsNullOrWhiteSpace(prefix))
-			{
-				return suffix;
-			}
-
-			return prefix + "." + suffix;
-		}
-
-		public string GetString(string valueName, string defaultValue)
-		{
-			CheckDisposed();
-			return Convert.ToString(_key.GetValue(valueName, defaultValue));
-		}
-
-		public void SetString(string valueName, string value)
-		{
-			CheckDisposed();
-			if (value == null)
-			{
-				_key.DeleteValue(valueName);
-			}
-			else
-			{
-				_key.SetValue(valueName, value);
+				GetFormPosition(null, _form);
 			}
 		}
 
-		public int GetInt32(string valueName, int defaultValue)
+		private void HandleFormClosed(object sender, FormClosedEventArgs e)
 		{
-			CheckDisposed();
-			var s = GetString(valueName, null);
-			if (s == null)
+			if (AutoSaveFormPosition)
 			{
-				return defaultValue;
+				SetFormPosition(null, _form);
 			}
-
-			int value;
-			if (!Int32.TryParse(s, out value))
-			{
-				value = defaultValue;
-			}
-			return value;
-		}
-
-		public void SetInt32(string valueName, int value)
-		{
-			CheckDisposed();
-			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
-		}
-
-		public decimal GetDecimal(string valueName, decimal defaultValue)
-		{
-			CheckDisposed();
-			var s = GetString(valueName, null);
-			if (s == null)
-			{
-				return defaultValue;
-			}
-
-			decimal value;
-			if (!decimal.TryParse(s, out value))
-			{
-				value = defaultValue;
-			}
-			return value;
-		}
-
-		public void SetDecimal(string valueName, decimal value)
-		{
-			CheckDisposed();
-			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
-		}
-
-		public bool GetBoolean(string valueName, bool defaultValue)
-		{
-			CheckDisposed();
-			var s = GetString(valueName, null);
-			if (s == null)
-			{
-				return defaultValue;
-			}
-
-			bool value;
-			if (!bool.TryParse(s, out value))
-			{
-				// have another go at converting to an integer
-				int intValue;
-				if (int.TryParse(s, out intValue))
-				{
-					value = intValue != 0;
-				}
-				else
-				{
-					value = defaultValue;	
-				}
-			}
-
-			return value;
-		}
-
-		public void SetBoolean(string valueName, bool value)
-		{
-			CheckDisposed();
-			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
-		}
-
-		public float GetSingle(string valueName, float defaultValue)
-		{
-			CheckDisposed();
-			var s = GetString(valueName, null);
-			if (s == null)
-			{
-				return defaultValue;
-			}
-
-			float value;
-			if (!float.TryParse(s, out value))
-			{
-				value = defaultValue;
-			}
-			return value;
-		}
-
-		public void SetSingle(string valueName, float value)
-		{
-			CheckDisposed();
-			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
-		}
-
-		public double GetDouble(string valueName, double defaultValue)
-		{
-			CheckDisposed();
-			var s = GetString(valueName, null);
-			if (s == null)
-			{
-				return defaultValue;
-			}
-
-			double value;
-			if (!double.TryParse(s, out value))
-			{
-				value = defaultValue;
-			}
-			return value;
-		}
-
-		public void SetDouble(string valueName, double value)
-		{
-			CheckDisposed();
-			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
-		}
-
-		public void Remove(string valueName)
-		{
-			CheckDisposed();
-			_key.DeleteValue(valueName, false);
 		}
 	}
 }

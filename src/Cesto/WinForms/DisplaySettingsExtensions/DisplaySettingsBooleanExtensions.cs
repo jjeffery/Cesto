@@ -3,7 +3,7 @@ namespace Cesto.WinForms
 {
 	public static class DisplaySettingsBooleanExtensions
 	{
-		public static DisplaySetting<bool> BooleanSetting(this DisplaySettings displaySettings, string name, bool defaultValue)
+		public static DisplaySetting<bool> BooleanSetting(this DisplaySettings displaySettings, string name, bool defaultValue = false)
 		{
 			return new DisplaySettingBoolean(displaySettings, name, defaultValue);
 		}
@@ -23,7 +23,7 @@ namespace Cesto.WinForms
 			{
 				if (value == DefaultValue)
 				{
-					DisplaySettings.Remove(Name);
+					DisplaySettings.Delete(Name);
 				}
 				else
 				{
