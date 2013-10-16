@@ -12,6 +12,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{69EE20
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{1E432780-23E4-46A9-801D-732AAF4F9A51}"
+	ProjectSection(SolutionItems) = preProject
+		Build.proj = Build.proj
+		build\MSBuild.Community.Tasks.dll = build\MSBuild.Community.Tasks.dll
+		build\MSBuild.Community.Tasks.targets = build\MSBuild.Community.Tasks.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
