@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Condition=" '$(FormalBuild)' != '' ">
+    <!-- include auto-generated assembly info during a formal build -->
+    <Compile Include="$(SolutionDir)\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+</Project>

@@ -16,7 +16,7 @@
 
   <PropertyGroup Condition=" '$(BUILD_NUMBER)' != '' ">
     <!-- Build Server Number -->
-    <Version>1.0.0.0</Version>
+    <Version>$(BUILD_NUMBER)</Version>
     <FileVersion>$(BUILD_NUMBER)</FileVersion>
     <InformationalVersion>$(BUILD_NUMBER)</InformationalVersion>
   </PropertyGroup>
@@ -52,7 +52,7 @@
   <!-- Projects to Build -->
   <ItemGroup>
     <ProjectFiles Include="$(MSBuildProjectDirectory)\**\*.sln">
-      <Properties>Configuration=$(BuildConfiguration)</Properties>
+      <Properties>Configuration=$(BuildConfiguration);FormalBuild=true</Properties>
     </ProjectFiles>
   </ItemGroup>
 
@@ -74,6 +74,5 @@
   <Target Name="Build">
     <CallTarget Targets="NugetPack" />
   </Target>
-	
 
 </Project>
