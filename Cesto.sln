@@ -14,7 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{69EE20
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{1E432780-23E4-46A9-801D-732AAF4F9A51}"
 	ProjectSection(SolutionItems) = preProject
-		Build.proj = Build.proj
+		build.proj = build.proj
+		build\Cesto.targets = build\Cesto.targets
 		build\MSBuild.Community.Tasks.dll = build\MSBuild.Community.Tasks.dll
 		build\MSBuild.Community.Tasks.targets = build\MSBuild.Community.Tasks.targets
 	EndProjectSection
