@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright 2004-2012 John Jeffery <john@jeffery.id.au>
+// Copyright 2004-2013 John Jeffery <john@jeffery.id.au>
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
