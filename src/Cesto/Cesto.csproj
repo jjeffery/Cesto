@@ -47,6 +47,8 @@
   <ItemGroup>
     <Compile Include="DisposableAction.cs" />
     <Compile Include="DisposableExtensions.cs" />
+    <Compile Include="WinForms\DataGridViewCellCheckCallback.cs" />
+    <Compile Include="WinForms\DataGridViewCellValueCallback.cs" />
     <Compile Include="WinForms\DisplaySetting.cs" />
     <Compile Include="WinForms\DisplaySettingsExtensions\DisplaySettingDataGridViewExtensions.cs" />
     <Compile Include="WinForms\DisplaySettingsExtensions\DisplaySettingDoubleExtensions.cs" />
@@ -71,8 +73,8 @@
   <ItemGroup>
     <None Include="Cesto.nuspec" />
   </ItemGroup>
-	<Import Project="$(SolutionDir)\build\Cesto.targets"/>
-	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\build\Cesto.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

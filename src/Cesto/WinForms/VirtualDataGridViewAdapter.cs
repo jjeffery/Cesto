@@ -5,82 +5,113 @@ using System.Windows.Forms;
 
 namespace Cesto.WinForms
 {
-	public delegate object DataGridViewCellValueCallback<in T>(T obj);
-
-	public delegate void DataGridViewCellCheckCallback<in T>(T obj, bool isChecked);
-
+	/// <summary>
+	///     This is an adapter that links a <see cref="DataGridView" /> with a <see cref="IVirtualDataSource{T}" />.
+	/// </summary>
+	/// <typeparam name="T">
+	///     The type of objects in the <see cref="IVirtualDataSource{T}" />.
+	/// </typeparam>
 	public class VirtualDataGridViewAdapter<T> : IDisposable where T : class
 	{
 		private readonly Dictionary<int, ColumnInfo> _columnInfos = new Dictionary<int, ColumnInfo>();
+		private ColumnInfo _checkColumn;
+		private IVirtualDataSource<T> _dataSource;
 
 		private DataGridViewColumn[] _defaultSortOrder;
-		private DataGridViewColumn _sortColumn;
-		private SortOrder _sortOrder = SortOrder.None;
 		private bool _isDisposed;
-		private Comparison<T> _sortComparison;
 		private bool _refreshPending;
-		private ColumnInfo _checkColumn;
+		private DataGridViewColumn _sortColumn;
+		private Comparison<T> _sortComparison;
+		private SortOrder _sortOrder = SortOrder.None;
 
-		public event EventHandler ListChanged;
-
-		public DataGridView DataGridView { get; private set; }
-		public DisplaySettings DisplaySettings { get; set; }
-		public IVirtualDataSource<T> DataSource { get; set; }
-
-		public Image CheckedImage { get; set; }
-		public Image UncheckedImage { get; set; }
-		public Image IndeterminateImage { get; set; }
-
+		/// <summary>
+		///     Creates a virtual data grid view adapter.
+		/// </summary>
+		/// <param name="dataGridView">
+		///     The <see cref="DataGridView" /> that this class controls.
+		/// </param>
 		public VirtualDataGridViewAdapter(DataGridView dataGridView)
 		{
 			DataGridView = Verify.ArgumentNotNull(dataGridView, "dataGridView");
 			DataGridView.VirtualMode = true;
 		}
 
-		public VirtualDataGridViewAdapter<T> Init(IVirtualDataSource<T> store)
+		/// <summary>
+		///     This event is raised whenever the underlying virtual data grid view
+		///     has changed.
+		/// </summary>
+		public event EventHandler ListChanged;
+
+		/// <summary>
+		///     The <see cref="DataGridView" /> associated with this adapter.
+		/// </summary>
+		public DataGridView DataGridView { get; private set; }
+
+		/// <summary>
+		///     The <see cref="DisplaySettings" /> used to store persistent properties, such
+		///     as column widths.
+		/// </summary>
+		public DisplaySettings DisplaySettings { get; set; }
+
+		/// <summary>
+		///     If the <see cref="DataGridView" /> is to display one or more check box columns,
+		///     this is the image displayed for a checked checkbox.
+		/// </summary>
+		public Image CheckedImage { get; set; }
+
+		/// <summary>
+		///     If the <see cref="DataGridView" /> is to display one or more check box columns,
+		///     this is the image displayed for an unchecked checkbox.
+		/// </summary>
+		public Image UncheckedImage { get; set; }
+
+		/// <summary>
+		///     If the <see cref="DataGridView" /> is to display one or more check box columns,
+		///     this is the image displayed for an indeterminate checkbox (ie neither checked
+		///     nor unchecked). This image is used in the column header when some rows are
+		///     checked, and some rows are unchecked.
+		/// </summary>
+		public Image IndeterminateImage { get; set; }
+
+		/// <summary>
+		///     The virtual data source that supplies the data grid view.
+		/// </summary>
+		public IVirtualDataSource<T> DataSource
 		{
-			if (DataSource != null)
+			get { return _dataSource; }
+			set
 			{
-				throw new InvalidOperationException("DataSource has already been set");
+				UnsubscribeEvents();
+				_dataSource = value;
+				SubscribeEvents();
+				if (_dataSource != null)
+				{
+					if (DisplaySettings != null)
+					{
+						DisplaySettings.LoadColumnWidths(DataGridView);
+					}
+					DataSource.Comparer = _sortComparison;
+				}
+				RefreshRequired();
 			}
-			DataSource = Verify.ArgumentNotNull(store, "store");
-			DataSource.ListChanged += ((sender, args) => RefreshRequired());
-
-			if (DisplaySettings != null)
-			{
-				DisplaySettings.LoadColumnWidths(DataGridView);
-			}
-
-			// Subscribe for events only after the store has been set, because these
-			// event handlers assume that Store != null.
-			DataGridView.CellValueNeeded += DataGridView_CellValueNeeded;
-			DataGridView.ColumnHeaderMouseClick += DataGridView_ColumnHeaderMouseClick;
-			DataGridView.CellContentClick += DataGridView_CellContentClick;
-			DataGridView.CellPainting += DataGridViewCellPainting;
-			DataGridView.ColumnWidthChanged += DataGridView_ColumnWidthChanged;
-			DataGridView.HandleCreated += DataGridView_HandleCreated;
-
-			WaitCursor.Changed += HandleWaitCursorHidden;
-
-			DataGridView.Disposed += (sender, args) => Dispose();
-			DataSource.Comparer = _sortComparison;
-
-			RefreshRequired();
-			return this;
 		}
 
-		public void Dispose()
-		{
-			_isDisposed = true;
-			WaitCursor.Changed -= HandleWaitCursorHidden;
-			ListChanged = null;
-		}
-
+		/// <summary>
+		///     As this object been disposed via the <see cref="Dispose" /> method.
+		/// </summary>
 		public bool IsDisposed
 		{
 			get { return _isDisposed; }
 		}
 
+		/// <summary>
+		///     The current object selected in the <see cref="DataGridView" />.
+		/// </summary>
+		/// <remarks>
+		///     Even if the data grid view is multi-select, one of the rows is the current row. This
+		///     property returns the associated object in the virtual data source associated with that
+		///     current row.
+		/// </remarks>
 		public T Current
 		{
 			get
@@ -93,12 +124,60 @@ namespace Cesto.WinForms
 			}
 		}
 
+		public void Dispose()
+		{
+			_isDisposed = true;
+			WaitCursor.Changed -= HandleWaitCursorHidden;
+			ListChanged = null;
+		}
+
+		/// <summary>
+		///     Initialize the adapter with the data store.
+		/// </summary>
+		[Obsolete("Use DataSource property instead of Init(dataStore)")]
+		public VirtualDataGridViewAdapter<T> Init(IVirtualDataSource<T> store)
+		{
+			DataSource = store;
+			return this;
+		}
+
+		private void DataGridView_ListChanged(object sender, EventArgs args)
+		{
+			RefreshRequired();
+		}
+
+		private void DataGridView_Disposed(object sender, EventArgs args)
+		{
+			Dispose();
+		}
+
+		/// <summary>
+		///     Set the default sort order for the <see cref="DataGridView" />.
+		/// </summary>
+		/// <param name="columns">
+		///     The column or columns to be in the default sort order.
+		/// </param>
+		/// <returns>
+		///     This object. Useful for chaining methods.
+		/// </returns>
 		public VirtualDataGridViewAdapter<T> SetDefaultSortOrder(params DataGridViewColumn[] columns)
 		{
 			_defaultSortOrder = (DataGridViewColumn[]) columns.Clone();
 			return this;
 		}
 
+		/// <summary>
+		///     Define a function to call to obtain the value to display in a cell of the <see cref="DataGridView" />.
+		/// </summary>
+		/// <param name="column">
+		///     The <see cref="DataGridViewColumn" /> in the <see cref="DataGridView" />.
+		/// </param>
+		/// <param name="callback">
+		///     A delegate to call to return the value to display in the data grid view cell.
+		/// </param>
+		/// <returns>
+		///     This object. Useful for chaining methods.
+		/// </returns>
 		public VirtualDataGridViewAdapter<T> DefineCellValue(DataGridViewColumn column,
 		                                                     DataGridViewCellValueCallback<T> callback)
 		{
@@ -109,13 +188,24 @@ namespace Cesto.WinForms
 			return this;
 		}
 
+		/// <summary>
+		///     Identifies a <see cref="DataGridViewColumn" /> as a check column.
+		/// </summary>
+		/// <param name="column">
+		///     The <see cref="DataGridViewColumn" /> in the <see cref="DataGridView" />.
+		/// </param>
+		/// <param name="callback">
+		///     A delegate callback that determines whether the check box in the
+		///     column should be checked or not.
+		/// </param>
+		/// <returns></returns>
 		public VirtualDataGridViewAdapter<T> SetCheckColumn(DataGridViewColumn column,
 		                                                    DataGridViewCellCheckCallback<T> callback)
 		{
 			Verify.ArgumentNotNull(column, "column");
 			Verify.ArgumentNotNull(callback, "callback");
 			VerifyColumnBelongsToGridView(column);
-			var columnInfo = GetColumnInfo(column.Index);
+			ColumnInfo columnInfo = GetColumnInfo(column.Index);
 			_checkColumn = columnInfo;
 			columnInfo.CellCheckCallback = callback;
 			columnInfo.HeaderCheckState = CheckState.Unchecked;
@@ -123,26 +213,48 @@ namespace Cesto.WinForms
 			return this;
 		}
 
+		/// <summary>
+		///     This identifes the <see cref="DataGridViewColumn" /> as a linked column.
+		///     This doesn't do anything much yet. It might get removed.
+		/// </summary>
+		/// <returns>
+		///     This object. Useful for method chaining.
+		/// </returns>
 		public VirtualDataGridViewAdapter<T> SetLinkColumn(DataGridViewColumn column)
 		{
 			Verify.ArgumentNotNull(column, "column");
 			VerifyColumnBelongsToGridView(column);
-			var columnInfo = GetColumnInfo(column.Index);
+			ColumnInfo columnInfo = GetColumnInfo(column.Index);
 			columnInfo.IsLinkColumn = true;
 			return this;
 		}
 
+		/// <summary>
+		///     Convenience method for assigning the <see cref="DisplaySettings" /> property.
+		///     Useful for method chaining.
+		/// </summary>
+		/// <returns>
+		///     This object. Useful for method chaining.
+		/// </returns>
 		public VirtualDataGridViewAdapter<T> WithDisplaySettings(DisplaySettings displaySettings)
 		{
 			DisplaySettings = displaySettings;
 			return this;
 		}
 
+		/// <summary>
+		///     Sort the <see cref="DataGridView" /> by the specified the <see cref="DataGridViewColumn" />.
+		///     The specified column will be the first column in the sort order. The remaining columns
+		///     in the sort order are defined by the <see cref="SetDefaultSortOrder" /> method.
+		/// </summary>
+		/// <returns>
+		///     This object. Useful for method chaining.
+		/// </returns>
 		public VirtualDataGridViewAdapter<T> SortBy(DataGridViewColumn sortColumn)
 		{
 			Verify.ArgumentNotNull(sortColumn, "sortColumn");
 			VerifyColumnBelongsToGridView(sortColumn);
-			var columnInfo = GetColumnInfo(sortColumn.Index);
+			ColumnInfo columnInfo = GetColumnInfo(sortColumn.Index);
 			if (columnInfo.CellValueCallback == null)
 			{
 				// cannot sort if this column has not value callback
@@ -152,11 +264,11 @@ namespace Cesto.WinForms
 			var sortCallbacks = new List<DataGridViewCellValueCallback<T>> {columnInfo.CellValueCallback};
 			if (_defaultSortOrder != null)
 			{
-				foreach (var column in _defaultSortOrder)
+				foreach (DataGridViewColumn column in _defaultSortOrder)
 				{
 					if (column.Visible && column != sortColumn)
 					{
-						var ci = GetColumnInfo(column.Index);
+						ColumnInfo ci = GetColumnInfo(column.Index);
 						if (ci.CellValueCallback != null)
 						{
 							sortCallbacks.Add(ci.CellValueCallback);
@@ -204,6 +316,40 @@ namespace Cesto.WinForms
 			return this;
 		}
 
+		private void SubscribeEvents()
+		{
+			if (DataSource != null)
+			{
+				// Subscribe for events only after the store has been set, because these
+				// event handlers assume that DataStore != null.
+				DataSource.ListChanged += DataGridView_ListChanged;
+				DataGridView.CellValueNeeded += DataGridView_CellValueNeeded;
+				DataGridView.ColumnHeaderMouseClick += DataGridView_ColumnHeaderMouseClick;
+				DataGridView.CellContentClick += DataGridView_CellContentClick;
+				DataGridView.CellPainting += DataGridViewCellPainting;
+				DataGridView.ColumnWidthChanged += DataGridView_ColumnWidthChanged;
+				DataGridView.HandleCreated += DataGridView_HandleCreated;
+				DataGridView.Disposed += DataGridView_Disposed;
+				WaitCursor.Changed += HandleWaitCursorHidden;
+			}
+		}
+
+		private void UnsubscribeEvents()
+		{
+			if (DataSource != null)
+			{
+				DataSource.ListChanged -= DataGridView_ListChanged;
+				DataGridView.CellValueNeeded -= DataGridView_CellValueNeeded;
+				DataGridView.ColumnHeaderMouseClick -= DataGridView_ColumnHeaderMouseClick;
+				DataGridView.CellContentClick -= DataGridView_CellContentClick;
+				DataGridView.CellPainting -= DataGridViewCellPainting;
+				DataGridView.ColumnWidthChanged -= DataGridView_ColumnWidthChanged;
+				DataGridView.HandleCreated -= DataGridView_HandleCreated;
+				DataGridView.Disposed -= DataGridView_Disposed;
+				WaitCursor.Changed -= HandleWaitCursorHidden;
+			}
+		}
+
 		private void RefreshRequired()
 		{
 			if (!DataGridView.IsHandleCreated)
@@ -236,7 +382,7 @@ namespace Cesto.WinForms
 				int currentRowIndex = -1;
 				int currentColumnIndex = -1;
 
-				// Need to do this to get around a suspected bug in DataGridView.
+				// Need to do this to get around a bug in DataGridView.
 				// If number of rows is reduced, need to set rows to zero first
 				// and then subsequently set to the correct value, otherwise DGV
 				// throws an exception.
@@ -273,7 +419,7 @@ namespace Cesto.WinForms
 				}
 			}
 
-			foreach (var columnInfo in _columnInfos.Values)
+			foreach (ColumnInfo columnInfo in _columnInfos.Values)
 			{
 				if (columnInfo.CellCheckCallback != null)
 				{
@@ -304,6 +450,7 @@ namespace Cesto.WinForms
 			}
 		}
 
+		// ReSharper disable UnusedParameter.Local
 		private void VerifyColumnBelongsToGridView(DataGridViewColumn column)
 		{
 			if (column.DataGridView != DataGridView)
@@ -312,12 +459,14 @@ namespace Cesto.WinForms
 			}
 		}
 
+		// ReSharper restore UnusedParameter.Local
+
 		private void SetHeaderCheckbox(ColumnInfo columnInfo)
 		{
 			columnInfo.CheckCount = 0;
 			columnInfo.UncheckCount = 0;
 
-			var callback = columnInfo.CellValueCallback;
+			DataGridViewCellValueCallback<T> callback = columnInfo.CellValueCallback;
 
 			// Build a delegate that can be called for every visible item in the store
 			Action<T> action = delegate(T item) {
@@ -335,7 +484,7 @@ namespace Cesto.WinForms
 
 			DataSource.ForEach(action);
 
-			CheckState checkState = CheckState.Unchecked;
+			var checkState = CheckState.Unchecked;
 
 			if (columnInfo.CheckCount > 0 && columnInfo.UncheckCount > 0)
 			{
@@ -365,11 +514,11 @@ namespace Cesto.WinForms
 		/// <param name="rowIndex"></param>
 		private void ToggleCheckBox(ColumnInfo columnInfo, int rowIndex)
 		{
-			var item = DataSource.GetAt(rowIndex);
+			T item = DataSource.GetAt(rowIndex);
 			if (item != null)
 			{
-				var getValueCallback = columnInfo.CellValueCallback;
-				var setValueCallback = columnInfo.CellCheckCallback;
+				DataGridViewCellValueCallback<T> getValueCallback = columnInfo.CellValueCallback;
+				DataGridViewCellCheckCallback<T> setValueCallback = columnInfo.CellCheckCallback;
 				bool checkValue = Convert.ToBoolean(getValueCallback(item));
 
 				if (checkValue)
@@ -385,7 +534,7 @@ namespace Cesto.WinForms
 					setValueCallback(item, true);
 				}
 
-				CheckState checkState = CheckState.Unchecked;
+				var checkState = CheckState.Unchecked;
 
 				if (columnInfo.CheckCount > 0 && columnInfo.UncheckCount > 0)
 				{
@@ -409,7 +558,7 @@ namespace Cesto.WinForms
 
 		private void DataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
 		{
-			var columnInfo = GetColumnInfo(e.ColumnIndex);
+			ColumnInfo columnInfo = GetColumnInfo(e.ColumnIndex);
 			if (columnInfo != null)
 			{
 				if (columnInfo.IsCheckBoxColumn)
@@ -430,7 +579,7 @@ namespace Cesto.WinForms
 		{
 			if (e.RowIndex == -1)
 			{
-				var columnInfo = GetColumnInfo(e.ColumnIndex);
+				ColumnInfo columnInfo = GetColumnInfo(e.ColumnIndex);
 				if (columnInfo.CellCheckCallback != null)
 				{
 					try
@@ -459,6 +608,9 @@ namespace Cesto.WinForms
 					catch
 					{
 						// TODO: Handle exception
+						// Not sure if this is still required. When this class was first developed,
+						// there was the odd time when this method would raise an exception. I no
+						// longer know if this should remain here.
 					}
 				}
 			}
@@ -466,7 +618,7 @@ namespace Cesto.WinForms
 
 		private void DataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
 		{
-			var columnInfo = GetColumnInfo(e.ColumnIndex);
+			ColumnInfo columnInfo = GetColumnInfo(e.ColumnIndex);
 			if (columnInfo.CellValueCallback == null)
 			{
 				// if we don't know how to get the value, we cannot sort
@@ -501,7 +653,7 @@ namespace Cesto.WinForms
 			}
 			else
 			{
-				var sortColumn = DataGridView.Columns[e.ColumnIndex];
+				DataGridViewColumn sortColumn = DataGridView.Columns[e.ColumnIndex];
 				if (sortColumn.SortMode != DataGridViewColumnSortMode.NotSortable)
 				{
 					SortBy(sortColumn);
@@ -511,7 +663,7 @@ namespace Cesto.WinForms
 
 		private void DataGridView_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
 		{
-			var columnInfo = GetColumnInfo(e.ColumnIndex);
+			ColumnInfo columnInfo = GetColumnInfo(e.ColumnIndex);
 			if (columnInfo.CellValueCallback != null)
 			{
 				T obj;
@@ -565,18 +717,18 @@ namespace Cesto.WinForms
 
 		private class ColumnInfo
 		{
+			public readonly int ColumnIndex;
+			public DataGridViewCellCheckCallback<T> CellCheckCallback;
+			public DataGridViewCellValueCallback<T> CellValueCallback;
+			public int CheckCount;
+			public CheckState HeaderCheckState;
+			public bool IsLinkColumn;
+			public int UncheckCount;
+
 			public ColumnInfo(int columnIndex)
 			{
 				ColumnIndex = columnIndex;
 			}
-
-			public readonly int ColumnIndex;
-			public DataGridViewCellValueCallback<T> CellValueCallback;
-			public DataGridViewCellCheckCallback<T> CellCheckCallback;
-			public CheckState HeaderCheckState;
-			public int CheckCount;
-			public int UncheckCount;
-			public bool IsLinkColumn;
 
 			public bool IsCheckBoxColumn
 			{
@@ -597,9 +749,9 @@ namespace Cesto.WinForms
 			{
 				foreach (var callback in _callbacks)
 				{
-					object v1 = callback(obj1);
-					object v2 = callback(obj2);
-					int result = CompareValues(v1, v2);
+					var v1 = callback(obj1);
+					var v2 = callback(obj2);
+					var result = CompareValues(v1, v2);
 					if (result != 0)
 					{
 						return result;
