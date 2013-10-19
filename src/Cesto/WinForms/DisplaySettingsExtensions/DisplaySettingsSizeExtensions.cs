@@ -21,18 +21,45 @@ using System.Drawing;
 namespace Cesto.WinForms.DisplaySettingsExtensions
 {
 	/// <summary>
-	/// Extension methods for <see cref="DisplaySettings"/>
+	///     Extension methods for <see cref="DisplaySettings" />
 	/// </summary>
 	public static class DisplaySettingsSizeExtensions
 	{
-		public static void SetSize(this DisplaySettings settings, string name, Size size)
+		/// <summary>
+		///     Set a <see cref="Size" /> value.
+		/// </summary>
+		/// <param name="settings">
+		///     The associated <see cref="DisplaySettings" />.
+		/// </param>
+		/// <param name="name">
+		///     The name of the value to set.
+		/// </param>
+		/// <param name="value">
+		///     The value to set.
+		/// </param>
+		public static void SetSize(this DisplaySettings settings, string name, Size value)
 		{
 			Verify.ArgumentNotNull(settings, "settings");
 			Verify.ArgumentNotNull(name, "name");
-			settings.SetInt32(name + ".Width", size.Width);
-			settings.SetInt32(name + ".Height", size.Height);
+			settings.SetInt32(name + ".Width", value.Width);
+			settings.SetInt32(name + ".Height", value.Height);
 		}
 
+		/// <summary>
+		///     Get a <see cref="Size" /> value.
+		/// </summary>
+		/// <param name="settings">
+		///     The associated <see cref="DisplaySettings" />.
+		/// </param>
+		/// <param name="name">
+		///     The name of the value to return as a <see cref="Size" />.
+		/// </param>
+		/// <param name="defaultValue">
+		///     The default value to return of the value does not exist.
+		/// </param>
+		/// <returns>
+		///     A <see cref="Size" /> value.
+		/// </returns>
 		public static Size GetSize(this DisplaySettings settings, string name, Size defaultValue)
 		{
 			Verify.ArgumentNotNull(settings, "settings");
@@ -47,9 +74,11 @@ namespace Cesto.WinForms.DisplaySettingsExtensions
 		}
 
 		/// <summary>
-		/// Create a <see cref="DisplaySetting{Size}"/>
+		///     Create a <see cref="DisplaySetting{Size}" />
 		/// </summary>
-		/// <param name="displaySettings">The <see cref="DisplaySettings"/>.</param>
+		/// <param name="displaySettings">
+		///     The <see cref="DisplaySettings" />.
+		/// </param>
 		/// <param name="name">Name of the value.</param>
 		/// <param name="defaultValue">Default value not present.</param>
 		/// <returns></returns>

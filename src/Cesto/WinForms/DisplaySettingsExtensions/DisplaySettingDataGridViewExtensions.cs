@@ -21,6 +21,9 @@ using System.Windows.Forms;
 // ReSharper disable CheckNamespace
 namespace Cesto.WinForms
 {
+	/// <summary>
+	/// Extension methods for <see cref="DisplaySettings"/>
+	/// </summary>
 	public static class DisplaySettingsDataGridViewExtensions
 	{
 		/// <summary>

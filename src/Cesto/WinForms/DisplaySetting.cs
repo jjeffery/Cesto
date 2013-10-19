@@ -43,6 +43,18 @@ namespace Cesto.WinForms
 		/// </summary>
 		public readonly T DefaultValue;
 
+		/// <summary>
+		///     Creates a new <see cref="DisplaySetting{T}" /> object.
+		/// </summary>
+		/// <param name="displaySettings">
+		///     The associated <see cref="DisplaySettings" /> object.
+		/// </param>
+		/// <param name="name">
+		///     The name of the value that this <see cref="DisplaySetting{T}" /> will read from and write to.
+		/// </param>
+		/// <param name="defaultValue">
+		///     The default value to return in <see cref="GetValue" /> when the value does not exist.
+		/// </param>
 		protected DisplaySetting(DisplaySettings displaySettings, string name, T defaultValue = default(T))
 		{
 			DisplaySettings = Verify.ArgumentNotNull(displaySettings, "displaySettings");
