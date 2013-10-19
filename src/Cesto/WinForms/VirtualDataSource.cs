@@ -36,6 +36,12 @@ namespace Cesto.WinForms
 		protected VirtualDataSource()
 		{}
 
+		/// <summary>
+		///     Create a new <see cref="VirtualDataSource{T}" /> object.
+		/// </summary>
+		/// <param name="getIdCallback">
+		///     Callback that returns the unique identifier for objects of type <typeparamref name="T" />
+		/// </param>
 		public VirtualDataSource(Func<T, int> getIdCallback) : base(getIdCallback)
 		{}
 	}
@@ -59,6 +65,9 @@ namespace Cesto.WinForms
 		private bool _buildListRequired = true;
 		private readonly Func<TItem, TId> _getIdCallback;
 
+		/// <summary>
+		///     <see cref="IVirtualDataSource{TItem}.ListChanged" />.
+		/// </summary>
 		public event EventHandler ListChanged;
 
 		/// <summary>
@@ -67,6 +76,10 @@ namespace Cesto.WinForms
 		protected VirtualDataSource()
 		{}
 
+		/// <summary>
+		///     Create a new <see cref="VirtualDataSource{TId, TItem}" /> object.
+		/// </summary>
+		/// <param name="getIdCallback"></param>
 		public VirtualDataSource(Func<TItem, TId> getIdCallback)
 		{
 			_getIdCallback = Verify.ArgumentNotNull(getIdCallback, "getIdCallback");
@@ -285,6 +298,12 @@ namespace Cesto.WinForms
 			RaiseListChanged();
 		}
 
+		/// <summary>
+		///     Replace the entire contents of the data source with the contents of the given list.
+		/// </summary>
+		/// <param name="list">
+		///     The new list of contents for the data source.
+		/// </param>
 		public void ReplaceContents(IEnumerable<TItem> list)
 		{
 			lock (_lockObject)
@@ -385,6 +404,17 @@ namespace Cesto.WinForms
 			}
 		}
 
+		/// <summary>
+		///     Find all objects in the data source for which a given condition is true.
+		/// </summary>
+		/// <param name="condition">
+		///     A <see cref="Predicate{TItem}" />, which returns <c>true</c> for the items
+		///     that should be returned.
+		/// </param>
+		/// <returns>
+		///     Returns a <see cref="List{TIemt}" />, which is a list of items for which
+		///     the given <paramref name="condition" /> is true.
+		/// </returns>
 		public List<TItem> FindAll(Predicate<TItem> condition)
 		{
 			lock (_lockObject)
@@ -402,6 +432,10 @@ namespace Cesto.WinForms
 			}
 		}
 
+		/// <summary>
+		///     Invalidates the data source, so that internal indexes will be rebuilt.
+		///     Also raises the <see cref="ListChanged" /> event.
+		/// </summary>
 		public void Invalidate()
 		{
 			lock (_lockObject)
@@ -412,6 +446,14 @@ namespace Cesto.WinForms
 			RaiseListChanged();
 		}
 
+		/// <summary>
+		///     Find the object in the data source with the specified id.
+		/// </summary>
+		/// <param name="id">Identity of the item to search for.</param>
+		/// <returns>
+		///     Returns the object with the specified id, or <c>null</c> if it
+		///     does not exist in the data source.
+		/// </returns>
 		public TItem FindById(TId id)
 		{
 			lock (_lockObject)
@@ -422,6 +464,14 @@ namespace Cesto.WinForms
 			}
 		}
 
+		/// <summary>
+		///     Remove the object with the specified id from the data source.
+		/// </summary>
+		/// <param name="id">Identity of the objec to remove.</param>
+		/// <returns>
+		///     Returns <c>true</c> if the item was removed from the list. Otherwise
+		///     returns <c>false</c> if the item did not exist in the list.
+		/// </returns>
 		public bool Remove(TId id)
 		{
 			bool result;
