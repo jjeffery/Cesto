@@ -6,21 +6,21 @@ using System.Threading;
 namespace Cesto.WinForms
 {
 	/// <summary>
-	/// A virtual data source optimised for displaying larger event log displays. It
-	/// does not provide any sorting functionality.
+	///     A virtual data source optimised for displaying larger event log displays. It
+	///     does not provide any sorting functionality.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class EventLoggingDataSource2<T> : IVirtualDataSource<T> where T : class
+	public class EventLoggingDataSource<T> : IVirtualDataSource<T> where T : class
 	{
 		/// <summary>
-		/// When number of items in the list exceeds this value, the list will be truncated to the number
-		/// of items specified by <see cref="PreferredCapacity"/>.
+		///     When number of items in the list exceeds this value, the list will be truncated to the number
+		///     of items specified by <see cref="PreferredCapacity" />.
 		/// </summary>
 		public int MaximumCapacity = 1300;
 
 		/// <summary>
-		/// When the number of items in the list exceeds <see cref="MaximumCapacity"/>, the number of items
-		/// will be truncated to this value.
+		///     When the number of items in the list exceeds <see cref="MaximumCapacity" />, the number of items
+		///     will be truncated to this value.
 		/// </summary>
 		public int PreferredCapacity = 1000;
 
@@ -32,8 +32,23 @@ namespace Cesto.WinForms
 
 		private readonly object _lockObject = new object();
 
+		/// <summary>
+		///     Create an new <see cref="EventLoggingDataSource{T}" /> object.
+		/// </summary>
+		public EventLoggingDataSource()
+		{
+			SynchronizationContext = SynchronizationContext.Current;
+		}
+
+		/// <summary>
+		///     This event is raised when the contents of the data source have changed.
+		/// </summary>
 		public event EventHandler ListChanged;
 
+		/// <summary>
+		///     If this property is not null, then the <see cref="ListChanged" /> event will be raised
+		///     via the <see cref="SynchronizationContext" />.
+		/// </summary>
 		public SynchronizationContext SynchronizationContext { get; set; }
 
 		public bool BuildListRequired
@@ -89,8 +104,8 @@ namespace Cesto.WinForms
 		}
 
 		/// <summary>
-		/// Callback for determining whether the event log entry has a log level of debug or lower.
-		/// These event log entries will be removed prior to any other event log entries.
+		///     Callback for determining whether the event log entry has a log level of debug or lower.
+		///     These event log entries will be removed prior to any other event log entries.
 		/// </summary>
 		public Predicate<T> IsDebugCallback { get; set; }
 
@@ -101,7 +116,9 @@ namespace Cesto.WinForms
 			get { return false; }
 		}
 
-
+		/// <summary>
+		///     Clear all items from the data source.
+		/// </summary>
 		public void Clear()
 		{
 			lock (_lockObject)
@@ -168,6 +185,12 @@ namespace Cesto.WinForms
 			}
 		}
 
+		/// <summary>
+		///     Add an item to the data source.
+		/// </summary>
+		/// <param name="item">
+		///     The item to add to the data source.
+		/// </param>
 		public void Add(T item)
 		{
 			bool raiseListChangedRequired = false;

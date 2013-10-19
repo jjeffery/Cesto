@@ -148,6 +148,18 @@ namespace Cesto.WinForms
 
 		#endregion
 
+		/// <summary>
+		///     Get a <see cref="String" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to return as a <see cref="String" />.
+		/// </param>
+		/// <param name="defaultValue">
+		///     The default value to return of the value does not exist.
+		/// </param>
+		/// <returns>
+		///     A <see cref="String" /> value.
+		/// </returns>
 		public string GetString(string valueName, string defaultValue = null)
 		{
 			CheckDisposed();
@@ -159,6 +171,15 @@ namespace Cesto.WinForms
 			return value.ToString();
 		}
 
+		/// <summary>
+		///     Set a <see cref="String" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to set.
+		/// </param>
+		/// <param name="value">
+		///     The value to set.
+		/// </param>
 		public void SetString(string valueName, string value)
 		{
 			CheckDisposed();
@@ -172,6 +193,18 @@ namespace Cesto.WinForms
 			}
 		}
 
+		/// <summary>
+		///     Get an <see cref="Int32" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to return as an <see cref="Int32" />.
+		/// </param>
+		/// <param name="defaultValue">
+		///     The default value to return of the value does not exist.
+		/// </param>
+		/// <returns>
+		///     An <see cref="Int32" /> value.
+		/// </returns>
 		public int GetInt32(string valueName, int defaultValue = 0)
 		{
 			CheckDisposed();
@@ -189,12 +222,33 @@ namespace Cesto.WinForms
 			return value;
 		}
 
+		/// <summary>
+		///     Set an <see cref="Int32" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to set.
+		/// </param>
+		/// <param name="value">
+		///     The value to set.
+		/// </param>
 		public void SetInt32(string valueName, int value)
 		{
 			CheckDisposed();
 			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
 		}
 
+		/// <summary>
+		///     Get a <see cref="Decimal" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to return as a <see cref="Decimal" />.
+		/// </param>
+		/// <param name="defaultValue">
+		///     The default value to return of the value does not exist.
+		/// </param>
+		/// <returns>
+		///     A <see cref="Decimal" /> value.
+		/// </returns>
 		public decimal GetDecimal(string valueName, decimal defaultValue = 0.0m)
 		{
 			CheckDisposed();
@@ -212,12 +266,33 @@ namespace Cesto.WinForms
 			return value;
 		}
 
+		/// <summary>
+		///     Set a <see cref="Decimal" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to set.
+		/// </param>
+		/// <param name="value">
+		///     The value to set.
+		/// </param>
 		public void SetDecimal(string valueName, decimal value)
 		{
 			CheckDisposed();
 			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
 		}
 
+		/// <summary>
+		///     Get a <see cref="Boolean" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to return as a <see cref="Boolean" />.
+		/// </param>
+		/// <param name="defaultValue">
+		///     The default value to return of the value does not exist.
+		/// </param>
+		/// <returns>
+		///     A <see cref="Boolean" /> value.
+		/// </returns>
 		public bool GetBoolean(string valueName, bool defaultValue = false)
 		{
 			CheckDisposed();
@@ -245,12 +320,33 @@ namespace Cesto.WinForms
 			return value;
 		}
 
+		/// <summary>
+		///     Set a <see cref="Boolean" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to set.
+		/// </param>
+		/// <param name="value">
+		///     The value to set.
+		/// </param>
 		public void SetBoolean(string valueName, bool value)
 		{
 			CheckDisposed();
 			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
 		}
 
+		/// <summary>
+		///     Get a <see cref="Single" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to return as a <see cref="Single" />.
+		/// </param>
+		/// <param name="defaultValue">
+		///     The default value to return of the value does not exist.
+		/// </param>
+		/// <returns>
+		///     A <see cref="Single" /> value.
+		/// </returns>
 		public float GetSingle(string valueName, float defaultValue = 0.0f)
 		{
 			CheckDisposed();
@@ -268,12 +364,33 @@ namespace Cesto.WinForms
 			return value;
 		}
 
+		/// <summary>
+		///     Set a <see cref="Single" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to set.
+		/// </param>
+		/// <param name="value">
+		///     The value to set.
+		/// </param>
 		public void SetSingle(string valueName, float value)
 		{
 			CheckDisposed();
 			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
 		}
 
+		/// <summary>
+		///     Get a <see cref="Double" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to return as a <see cref="Double" />.
+		/// </param>
+		/// <param name="defaultValue">
+		///     The default value to return of the value does not exist.
+		/// </param>
+		/// <returns>
+		///     A <see cref="Double" /> value.
+		/// </returns>
 		public double GetDouble(string valueName, double defaultValue = 0.0)
 		{
 			CheckDisposed();
@@ -291,6 +408,33 @@ namespace Cesto.WinForms
 			return value;
 		}
 
+		/// <summary>
+		///     Set a <see cref="Double" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to set.
+		/// </param>
+		/// <param name="value">
+		///     The value to set.
+		/// </param>
+		public void SetDouble(string valueName, double value)
+		{
+			CheckDisposed();
+			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
+		}
+
+		/// <summary>
+		///     Get a <see cref="DateTime" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to return as a <see cref="DateTime" />.
+		/// </param>
+		/// <param name="defaultValue">
+		///     The default value to return of the value does not exist.
+		/// </param>
+		/// <returns>
+		///     A <see cref="DateTime" /> value.
+		/// </returns>
 		public DateTime GetDateTime(string valueName, DateTime defaultValue = default(DateTime))
 		{
 			var stringValue = GetString(valueName);
@@ -308,6 +452,15 @@ namespace Cesto.WinForms
 			return value;
 		}
 
+		/// <summary>
+		///     Set a <see cref="DateTime" /> value.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to set.
+		/// </param>
+		/// <param name="value">
+		///     The value to set.
+		/// </param>
 		public void SetDateTime(string valueName, DateTime value)
 		{
 			string stringValue;
@@ -321,13 +474,6 @@ namespace Cesto.WinForms
 				stringValue = value.ToString("yyyy-MM-dd HH:mm:ss.fffff");
 			}
 			SetString(valueName, stringValue);
-
-		}
-
-		public void SetDouble(string valueName, double value)
-		{
-			CheckDisposed();
-			SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
 		}
 
 		/// <summary>
@@ -407,6 +553,12 @@ namespace Cesto.WinForms
 			_key.SetValue(GetValueName(valueName, "DesktopBounds.Height"), _form.DesktopBounds.Height);
 		}
 
+		/// <summary>
+		///     Delete the value with the specified name.
+		/// </summary>
+		/// <param name="valueName">
+		///     The name of the value to delete.
+		/// </param>
 		public void Delete(string valueName)
 		{
 			CheckDisposed();

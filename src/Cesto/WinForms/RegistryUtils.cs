@@ -58,6 +58,15 @@ namespace Cesto.WinForms
 			set { _basePath = value; }
 		}
 
+		/// <summary>
+		///     Returns the path underneath the <see cref="BasePath" /> with the
+		///     specified <paramref name="subKeyName" />.
+		/// </summary>
+		/// <param name="subKeyName">Name of the sub key.</param>
+		/// <returns>
+		///     If <see cref="BasePath" /> is "SOFTWARE\Company\Product" then the sub key
+		///     with name "SubKey" would have a path "SOFTWARE\Company\Product\SubKey".
+		/// </returns>
 		public static string SubKeyPath(string subKeyName)
 		{
 			var sb = new StringBuilder(BasePath);
@@ -69,6 +78,16 @@ namespace Cesto.WinForms
 			return sb.ToString();
 		}
 
+		/// <summary>
+		///     Returns the path underneath the <see cref="BasePath" /> with the
+		///     specified <paramref name="subKeyNames" />.
+		/// </summary>
+		/// <param name="subKeyNames">Names of the sub keys.</param>
+		/// <returns>
+		///     If <see cref="BasePath" /> is "SOFTWARE\Company\Product" then the sub key
+		///     with names "SubKey1", "SubKey2" and "SubKey3" would have a path
+		///     "SOFTWARE\Company\Product\SubKey1\SubKey2\SubKey3".
+		/// </returns>
 		public static string SubKeyPath(params string[] subKeyNames)
 		{
 			var sb = new StringBuilder(BasePath);
