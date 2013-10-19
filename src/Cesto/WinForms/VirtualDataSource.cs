@@ -85,6 +85,9 @@ namespace Cesto.WinForms
 			_getIdCallback = Verify.ArgumentNotNull(getIdCallback, "getIdCallback");
 		}
 
+		/// <summary>
+		///     <see cref="IVirtualDataSource{T}.BuildListRequired" />
+		/// </summary>
 		public bool BuildListRequired
 		{
 			get { return _buildListRequired || _sortRequired; }
@@ -123,6 +126,9 @@ namespace Cesto.WinForms
 			}
 		}
 
+		/// <summary>
+		///     <see cref="IVirtualDataSource{T}.CanSort" />
+		/// </summary>
 		public bool CanSort
 		{
 			get { return true; }

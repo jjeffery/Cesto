@@ -76,6 +76,9 @@ namespace Cesto.WinForms
 			get { return _filter != null && _filteredList == null; }
 		}
 
+		/// <summary>
+		///     <see cref="IVirtualDataSource{T}.Count" />
+		/// </summary>
 		public int Count
 		{
 			get
@@ -97,7 +100,9 @@ namespace Cesto.WinForms
 
 		private Predicate<T> _filter;
 
-		// No lock required
+		/// <summary>
+		///     <see cref="IVirtualDataSource{T}.Filter" />
+		/// </summary>
 		public Predicate<T> Filter
 		{
 			get { return _filter; }
@@ -127,8 +132,14 @@ namespace Cesto.WinForms
 		/// </summary>
 		public Predicate<T> IsDebugCallback { get; set; }
 
+		/// <summary>
+		///     <see cref="IVirtualDataSource{T}.Comparer" />
+		/// </summary>
 		public Comparison<T> Comparer { get; set; }
 
+		/// <summary>
+		///     <see cref="IVirtualDataSource{T}.CanSort" />
+		/// </summary>
 		public bool CanSort
 		{
 			get { return false; }
@@ -149,6 +160,9 @@ namespace Cesto.WinForms
 			}
 		}
 
+		/// <summary>
+		///     <see cref="IVirtualDataSource{T}.GetAt" />
+		/// </summary>
 		public T GetAt(int index)
 		{
 			lock (_lockObject)
@@ -184,6 +198,9 @@ namespace Cesto.WinForms
 			}
 		}
 
+		/// <summary>
+		///     <see cref="IVirtualDataSource{T}.ForEach" />
+		/// </summary>
 		public void ForEach(Action<T> action)
 		{
 			lock (_lockObject)

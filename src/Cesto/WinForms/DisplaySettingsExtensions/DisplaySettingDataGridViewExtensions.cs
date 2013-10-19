@@ -23,6 +23,14 @@ namespace Cesto.WinForms
 {
 	public static class DisplaySettingsDataGridViewExtensions
 	{
+		/// <summary>
+		/// Save the width of a <see cref="DataGridViewColumn"/>. The name of the value
+		/// is derived from the name of the <see cref="DataGridViewColumn"/>.
+		/// </summary>
+		/// <param name="settings">
+		/// The <see cref="DisplaySettings"/> that will persist the column width.
+		/// </param>
+		/// <param name="column">The <see cref="DataGridViewColumn"/> whose width is to be persisted.</param>
 		public static void SaveColumnWidth(this DisplaySettings settings, DataGridViewColumn column)
 		{
 			Verify.ArgumentNotNull(settings, "settings");
@@ -37,6 +45,14 @@ namespace Cesto.WinForms
 			}
 		}
 
+		/// <summary>
+		/// Save the widths of all columns in a <see cref="DataGridView"/>. The name of the values
+		/// are derived from the names of the individual <see cref="DataGridViewColumn"/> objects.
+		/// </summary>
+		/// <param name="settings">
+		/// The <see cref="DisplaySettings"/> that will persist the column width.
+		/// </param>
+		/// <param name="dataGridView">The <see cref="DataGridView"/> whose column widths are to be persisted.</param>
 		public static void SaveColumnWidths(this DisplaySettings settings, DataGridView dataGridView)
 		{
 			Verify.ArgumentNotNull(settings, "settings");
@@ -48,6 +64,14 @@ namespace Cesto.WinForms
 			}
 		}
 
+		/// <summary>
+		/// Load the widths of all columns in a <see cref="DataGridView"/>. The name of the values
+		/// are derived from the names of the individual <see cref="DataGridViewColumn"/> objects.
+		/// </summary>
+		/// <param name="settings">
+		/// The <see cref="DisplaySettings"/> that will persist the column width.
+		/// </param>
+		/// <param name="dataGridView">The <see cref="DataGridView"/> whose column widths are to be loaded.</param>
 		public static void LoadColumnWidths(this DisplaySettings settings, DataGridView dataGridView)
 		{
 			Verify.ArgumentNotNull(settings, "settings");
