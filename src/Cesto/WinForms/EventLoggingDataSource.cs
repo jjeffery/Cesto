@@ -69,6 +69,9 @@ namespace Cesto.WinForms
 		/// </summary>
 		public SynchronizationContext SynchronizationContext { get; set; }
 
+		/// <summary>
+		///     <see cref="IVirtualDataSource{T}.BuildListRequired" />.
+		/// </summary>
 		public bool BuildListRequired
 		{
 			// This is for indicating that a lengthy build list is

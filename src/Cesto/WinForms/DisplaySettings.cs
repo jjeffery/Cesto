@@ -155,6 +155,9 @@ namespace Cesto.WinForms
 			_form.FormClosed += HandleFormClosed;
 		}
 
+		/// <summary>
+		///     <see cref="IDisposable.Dispose" />
+		/// </summary>
 		public void Dispose()
 		{
 			if (_key != null)

@@ -142,6 +142,9 @@ namespace Cesto.WinForms
 			}
 		}
 
+		/// <summary>
+		///     <see cref="IDisposable.Dispose" />.
+		/// </summary>
 		public void Dispose()
 		{
 			_isDisposed = true;
