@@ -16,7 +16,7 @@ A collection of useful .NET utilities. These are classes that I have used in a n
 
 ### Windows Forms
 
--   `DisplaySettings`: Easily persist UI values across process instances.For example, easily persist the position and size of a Windows Form, the widths of DataGridView columns, and many other values that you want to persist across program instances. * *
+-   `DisplaySettings`: Easily persist UI values across process instances.For example, easily persist the position and size of a Windows Form, the widths of DataGridView columns, and many other values that you want to persist across program instances.
 
 -   `ApplicationInfo`: A bit similar to the Windows Form `Application` class. Contains company information, product name, version and the like. Unlike the Windows Form `Application` class, this class allows the program to change the default values. 
 
