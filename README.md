@@ -55,8 +55,3 @@ public nuget repository.
 Not sure where the name "Cesto" comes from. I just wanted a short name that is
 not being used in nuget. I think it might mean "Often" in Bosnian.
 
-+---------------+---------------------------------+
-| Column 1      | Column 2                        |
-+---------------+---------------------------------+
-| I just wanted | to see if GFM works with tables |
-+---------------+---------------------------------+
