@@ -10,7 +10,7 @@ A collection of useful .NET utilities. These are classes that I have used in a n
 
 ### Disposables
 
--   `DisposableAction`: Easily create objects that implement `IDisposable` for use in C\\\\\# `using` statements.
+-   `DisposableAction`: Easily create objects that implement `IDisposable` for use in C\# `using` statements.
 
 -   `DisposableExtensions`: Extension methods for `IDisposable` objects. Allows an `IDisposable` to be disposed when other objects are disposed.
 
