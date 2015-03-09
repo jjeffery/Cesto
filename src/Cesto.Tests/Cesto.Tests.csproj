@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigTests.cs" />
     <Compile Include="DisposableActionTests.cs" />
     <Compile Include="DisposableCollectionTests.cs" />
     <Compile Include="DisposableExtensionsTests.cs" />

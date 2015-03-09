@@ -45,6 +45,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CestoException.cs" />
+    <Compile Include="Config\BooleanParameter.cs" />
+    <Compile Include="Config\ConfigException.cs" />
+    <Compile Include="Config\ConfigParameter.cs" />
+    <Compile Include="Config\ConfigParameterCollection.cs" />
+    <Compile Include="Config\ConfigParameterType.cs" />
+    <Compile Include="Config\DateParameter.cs" />
+    <Compile Include="Config\IConfigParameter.cs" />
+    <Compile Include="Config\Int32Parameter.cs" />
+    <Compile Include="Config\Storage\ConfigValue.cs" />
+    <Compile Include="Config\Storage\IConfigStorage.cs" />
+    <Compile Include="Config\Storage\MemoryStorage.cs" />
+    <Compile Include="Config\StringParameter.cs" />
+    <Compile Include="Config\TimeSpanExtensions.cs" />
+    <Compile Include="Config\TimeSpanParameter.cs" />
+    <Compile Include="Config\UrlParameter.cs" />
     <Compile Include="DisposableAction.cs" />
     <Compile Include="DisposableCollection.cs" />
     <Compile Include="DisposableExtensions.cs" />
