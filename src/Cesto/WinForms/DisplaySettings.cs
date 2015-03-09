@@ -134,7 +134,7 @@ namespace Cesto.WinForms
 		public DisplaySettings(Component component, string name = null) : this(name ?? GetNameFromComponent(component))
 		{
 			Verify.ArgumentNotNull(component, "component");
-			this.DisposeWith(component);
+		    component.Disposed += (sender, args) => Dispose();
 		}
 
 		/// <summary>

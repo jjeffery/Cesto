@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright 2004-2013 John Jeffery <john@jeffery.id.au>
+// Copyright 2004-2015 John Jeffery <john@jeffery.id.au>
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 #endregion
 
 using System;
-using System.ComponentModel;
-using System.Windows.Forms;
 
 namespace Cesto
 {
@@ -27,23 +25,22 @@ namespace Cesto
 	/// </summary>
 	public static class DisposableExtensions
 	{
-		/// <summary>
-		///     Specify that the <see cref="IDisposable" /> should be disposed when the <see cref="Component" />
-		///     is disposed.
-		/// </summary>
-		/// <param name="disposable">
-		///     An <see cref="IDisposable" /> that should be disposed at the same
-		///     time as the <paramref name="component" />.
-		/// </param>
-		/// <param name="component">
-		///     A <see cref="Component" />, which includes Windows Forms <see cref="Control" />  <see cref="Form" /> objects.
-		/// </param>
-		public static void DisposeWith(this IDisposable disposable, Component component)
-		{
-			if (disposable != null && component != null)
-			{
-				component.Disposed += (sender, args) => disposable.Dispose();
-			}
-		}
+	    /// <summary>
+	    /// Add the <see cref="IDisposable"/> object to the <see cref="DisposableCollection"/>.
+	    /// </summary>
+	    /// <param name="disposable">The <see cref="IDisposable"/> to add to the collection.</param>
+	    /// <param name="collection">The <see cref="DisposableCollection"/> to add the disposable to. Must not be null.</param>
+	    /// <returns>
+	    /// Returns <paramref name="disposable"/>.
+	    /// </returns>
+	    public static T AddTo<T>(this T disposable, DisposableCollection collection) where T : IDisposable
+	    {
+            Verify.ArgumentNotNull(collection, "collection");
+            if (disposable != null)
+	        {
+                collection.Add(disposable);
+	        }
+	        return disposable;
+	    }
 	}
 }

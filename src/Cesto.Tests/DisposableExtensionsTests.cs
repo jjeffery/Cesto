@@ -6,16 +6,14 @@ namespace Cesto.Tests
 	[TestFixture]
 	public class DisposableExtensionsTests
 	{
-		[Test]
-		public void DisposeWith()
-		{
-			var disposed = false;
-			var disposable = new DisposableAction(() => disposed = true);
-			var component = new Component();
-			disposable.DisposeWith(component);
-			Assert.AreEqual(false, disposed);
-			component.Dispose();
-			Assert.AreEqual(true, disposed);
-		}
+	    [Test]
+	    public void AddTo()
+	    {
+	        var collection = new DisposableCollection();
+	        var disposable = new Component();
+	        disposable.AddTo(collection);
+	        Assert.AreEqual(1, collection.Count);
+            Assert.IsTrue(collection.Contains(disposable));
+	    }
 	}
 }

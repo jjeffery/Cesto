@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DisposableActionTests.cs" />
+    <Compile Include="DisposableCollectionTests.cs" />
     <Compile Include="DisposableExtensionsTests.cs" />
     <Compile Include="VerifyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

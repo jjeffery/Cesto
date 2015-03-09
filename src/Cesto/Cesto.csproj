@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DisposableAction.cs" />
+    <Compile Include="DisposableCollection.cs" />
     <Compile Include="DisposableExtensions.cs" />
     <Compile Include="WinForms\DataGridViewCellCheckCallback.cs" />
     <Compile Include="WinForms\DataGridViewCellValueCallback.cs" />
