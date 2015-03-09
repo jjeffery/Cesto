@@ -49,6 +49,8 @@
     <Compile Include="DisposableActionTests.cs" />
     <Compile Include="DisposableCollectionTests.cs" />
     <Compile Include="DisposableExtensionsTests.cs" />
+    <Compile Include="IdHelperTests.cs" />
+    <Compile Include="EntityBaseTests.cs" />
     <Compile Include="VerifyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WinForms\ApplicationInfoTests.cs" />

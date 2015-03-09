@@ -64,6 +64,8 @@
     <Compile Include="DisposableAction.cs" />
     <Compile Include="DisposableCollection.cs" />
     <Compile Include="DisposableExtensions.cs" />
+    <Compile Include="EntityBase.cs" />
+    <Compile Include="Internal\IdHelpers.cs" />
     <Compile Include="WinForms\DataGridViewCellCheckCallback.cs" />
     <Compile Include="WinForms\DataGridViewCellValueCallback.cs" />
     <Compile Include="WinForms\DisplaySetting.cs" />
