@@ -50,6 +50,19 @@ namespace Cesto.Tests
             Assert.AreEqual(0, collection.Count);
         }
 
+        [Test]
+        public void ConstructorFromEnumerable()
+        {
+            var list = new List<SomeDisposable>
+            {
+                new SomeDisposable(),
+                new SomeDisposable()
+            };
+
+            var coll = new DisposableCollection(list);
+            Assert.AreEqual(2, coll.Count);
+        }
+
         private class DodgyDisposable : IDisposable
         {
             public int DisposeCount = 0;
@@ -61,6 +74,11 @@ namespace Cesto.Tests
                 // Simulate an object that throws an exception when it is disposed.
                 throw new ObjectDisposedException("Test");
             }
+        }
+
+        private class SomeDisposable : IDisposable
+        {
+            public void Dispose() { }
         }
     }
 }

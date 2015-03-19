@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Cesto
@@ -13,6 +14,23 @@ namespace Cesto
     /// </remarks>
     public class DisposableCollection : Collection<IDisposable>, IDisposable
     {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public DisposableCollection() { }
+
+        /// <summary>
+        /// Construct a <see cref="DisposableCollection"/> and populate from an existing collection.
+        /// </summary>
+        /// <param name="list">List of <see cref="IDisposable"/> objects.</param>
+        public DisposableCollection(IEnumerable<IDisposable> list)
+        {
+            foreach (var disposable in list)
+            {
+                Add(disposable);
+            }
+        }
+
         /// <summary>
         /// Indicates whether the collection has been disposed yet.
         /// </summary>
