@@ -76,7 +76,7 @@ namespace Cesto.Config
 
 		public override string ToString()
 		{
-			return Name + ": " + ((IConfigParameter) this).GetValueText();
+			return ((IConfigParameter) this).GetValueText();
 		}
 
 		bool IConfigParameter.IsReadOnly
