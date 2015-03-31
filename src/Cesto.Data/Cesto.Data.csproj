@@ -1,19 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F87DED0E-DFB7-41C3-9382-418B26B32309}</ProjectGuid>
+    <ProjectGuid>{E21873FA-DD81-42B1-864D-2CB7A3895645}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Cesto.Tests</RootNamespace>
-    <AssemblyName>Cesto.Tests</AssemblyName>
+    <RootNamespace>Cesto</RootNamespace>
+    <AssemblyName>Cesto.Data</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,50 +30,46 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config\ConfigTests.cs" />
-    <Compile Include="Core\DisposableActionTests.cs" />
-    <Compile Include="Core\DisposableCollectionTests.cs" />
-    <Compile Include="Core\DisposableExtensionsTests.cs" />
-    <Compile Include="Core\IdHelperTests.cs" />
-    <Compile Include="Core\OrmEntityTests.cs" />
-    <Compile Include="Core\VerifyTests.cs" />
+    <Compile Include="Data\DataReader\DataReaderDecorator.cs" />
+    <Compile Include="Data\DataReader\StringTrimDataReader.cs" />
+    <Compile Include="Data\IgnoreParameterAttribute.cs" />
+    <Compile Include="Data\Internal\DataConversionKey.cs" />
+    <Compile Include="Data\Internal\DataParameterBuilder.cs" />
+    <Compile Include="Data\Internal\DataParameterInfo.cs" />
+    <Compile Include="Data\Internal\DataParameterTypeMapping.cs" />
+    <Compile Include="Data\Internal\DataRecordConverter.cs" />
+    <Compile Include="Data\Internal\DataRecordConverterMethod.cs" />
+    <Compile Include="Data\Internal\DataRecordConverterSpec.cs" />
+    <Compile Include="Data\Internal\DataRecordConverterTypeBuilder.cs" />
+    <Compile Include="Data\Internal\DataRecordFieldInfo.cs" />
+    <Compile Include="Data\Internal\DynamicAssembly.cs" />
+    <Compile Include="Data\Internal\NameDictionary.cs" />
+    <Compile Include="Data\Internal\SqlCommandText.cs" />
+    <Compile Include="Data\Internal\SqlQueryReader.cs" />
+    <Compile Include="Data\Internal\TypeExtensions.cs" />
+    <Compile Include="Data\ISqlQueryReader.cs" />
+    <Compile Include="Data\ParameterAttribute.cs" />
+    <Compile Include="Data\SqlQuery.cs" />
+    <Compile Include="Data\SqlQuery.Generic.cs" />
+    <Compile Include="Data\SqlQueryBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SelfHost\ApplicationInfoTests.cs" />
-    <Compile Include="SelfHost\DisplaySettingsTests.cs" />
-    <Compile Include="SelfHost\RegistryUtilsTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Cesto.Config\Cesto.Config.csproj">
-      <Project>{d925015e-b707-4c11-84dc-5e69dcd82540}</Project>
-      <Name>Cesto.Config</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Cesto.Core\Cesto.Core.csproj">
       <Project>{672e3267-66f3-4b93-bb4e-618058a7867f}</Project>
       <Name>Cesto.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Cesto.SelfHost\Cesto.SelfHost.csproj">
-      <Project>{c4503f41-cb37-4873-84cb-e989d36b9c25}</Project>
-      <Name>Cesto.SelfHost</Name>
-    </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

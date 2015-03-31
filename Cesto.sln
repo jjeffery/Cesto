@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cesto", "src\Cesto\Cesto.csproj", "{EBDE819B-3C60-4504-99ED-BD8BEC74C445}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cesto.Tests", "src\Cesto.Tests\Cesto.Tests.csproj", "{F87DED0E-DFB7-41C3-9382-418B26B32309}"
@@ -12,13 +14,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{69EE20
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{1E432780-23E4-46A9-801D-732AAF4F9A51}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{1E432780-23E4-46A9-801D-732AAF4F9A51}"
 	ProjectSection(SolutionItems) = preProject
 		build.proj = build.proj
 		build\Cesto.targets = build\Cesto.targets
 		build\MSBuild.Community.Tasks.dll = build\MSBuild.Community.Tasks.dll
 		build\MSBuild.Community.Tasks.targets = build\MSBuild.Community.Tasks.targets
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cesto.Core", "src\Cesto.Core\Cesto.Core.csproj", "{672E3267-66F3-4B93-BB4E-618058A7867F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cesto.SelfHost", "src\Cesto.SelfHost\Cesto.SelfHost.csproj", "{C4503F41-CB37-4873-84CB-E989D36B9C25}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cesto.Config", "src\Cesto.Config\Cesto.Config.csproj", "{D925015E-B707-4C11-84DC-5E69DCD82540}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cesto.Data", "src\Cesto.Data\Cesto.Data.csproj", "{E21873FA-DD81-42B1-864D-2CB7A3895645}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cesto.Threading", "src\Cesto.Threading\Cesto.Threading.csproj", "{44A60CED-FD1D-43BD-8022-9923B1D62D32}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{11567940-630A-4B8D-B144-3094D8957854}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6B838C6A-376F-4242-B8E2-ABCCC04A2A2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cesto.NH", "src\Cesto.NH\Cesto.NH.csproj", "{CABFD913-91AD-41AB-84E0-7AE11155A8F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,8 +52,41 @@ Global
 		{F87DED0E-DFB7-41C3-9382-418B26B32309}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F87DED0E-DFB7-41C3-9382-418B26B32309}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F87DED0E-DFB7-41C3-9382-418B26B32309}.Release|Any CPU.Build.0 = Release|Any CPU
+		{672E3267-66F3-4B93-BB4E-618058A7867F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{672E3267-66F3-4B93-BB4E-618058A7867F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{672E3267-66F3-4B93-BB4E-618058A7867F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{672E3267-66F3-4B93-BB4E-618058A7867F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4503F41-CB37-4873-84CB-E989D36B9C25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4503F41-CB37-4873-84CB-E989D36B9C25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4503F41-CB37-4873-84CB-E989D36B9C25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4503F41-CB37-4873-84CB-E989D36B9C25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D925015E-B707-4C11-84DC-5E69DCD82540}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D925015E-B707-4C11-84DC-5E69DCD82540}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D925015E-B707-4C11-84DC-5E69DCD82540}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D925015E-B707-4C11-84DC-5E69DCD82540}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E21873FA-DD81-42B1-864D-2CB7A3895645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E21873FA-DD81-42B1-864D-2CB7A3895645}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E21873FA-DD81-42B1-864D-2CB7A3895645}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E21873FA-DD81-42B1-864D-2CB7A3895645}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44A60CED-FD1D-43BD-8022-9923B1D62D32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44A60CED-FD1D-43BD-8022-9923B1D62D32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44A60CED-FD1D-43BD-8022-9923B1D62D32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44A60CED-FD1D-43BD-8022-9923B1D62D32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CABFD913-91AD-41AB-84E0-7AE11155A8F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CABFD913-91AD-41AB-84E0-7AE11155A8F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CABFD913-91AD-41AB-84E0-7AE11155A8F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CABFD913-91AD-41AB-84E0-7AE11155A8F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F87DED0E-DFB7-41C3-9382-418B26B32309} = {6B838C6A-376F-4242-B8E2-ABCCC04A2A2B}
+		{672E3267-66F3-4B93-BB4E-618058A7867F} = {11567940-630A-4B8D-B144-3094D8957854}
+		{C4503F41-CB37-4873-84CB-E989D36B9C25} = {11567940-630A-4B8D-B144-3094D8957854}
+		{D925015E-B707-4C11-84DC-5E69DCD82540} = {11567940-630A-4B8D-B144-3094D8957854}
+		{E21873FA-DD81-42B1-864D-2CB7A3895645} = {11567940-630A-4B8D-B144-3094D8957854}
+		{44A60CED-FD1D-43BD-8022-9923B1D62D32} = {11567940-630A-4B8D-B144-3094D8957854}
+		{CABFD913-91AD-41AB-84E0-7AE11155A8F8} = {11567940-630A-4B8D-B144-3094D8957854}
 	EndGlobalSection
 EndGlobal
