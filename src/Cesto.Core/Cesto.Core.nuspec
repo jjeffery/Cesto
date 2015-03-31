@@ -1,16 +1,20 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>$id$</id>
+    <id>Cesto.Core</id>
     <version>$version$</version>
-    <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
+    <title>Cesto library core assembly</title>
+    <authors>John Jeffery</authors>
     <licenseUrl>https://raw.githubusercontent.com/jjeffery/Cesto/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/jjeffery/cesto</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/jjeffery/Cesto/master/cesto.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
-    <copyright>$copyright$</copyright>
+    <description>Cesto library core assembly</description>
+    <copyright>Copyright 2015. All rights reserved.</copyright>
   </metadata>
+  <files>
+    <file src="bin\Release\Cesto.Core.dll" target="lib\net40"/>
+    <file src="bin\Release\Cesto.Core.pdb" target="lib\net40"/>
+    <file src="**\*.cs" target="src"/>
+  </files>
 </package>
