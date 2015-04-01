@@ -20,12 +20,11 @@ artifacts:
 
 nuget:
   account_feed: true
-  project_feed: true
   disable_publish_on_pr: true # disable publishing of .nupkg artifacts to
                               # account/project feeds for pull requests
 
 #deploy:
 #  provider: Environment
-#  name: AccountNuGet
+#  name: NuGet
 #  on:
 #    branch: master
