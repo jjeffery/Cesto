@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Cesto.SelfHost</id>
+    <id>Cesto.Config</id>
     <version>$version$</version>
     <title>Cesto library configuration assembly</title>
     <authors>John Jeffery</authors>
