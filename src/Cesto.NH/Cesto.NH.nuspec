@@ -1,0 +1,25 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Cesto.NH</id>
+    <version>$version$</version>
+    <title>Cesto library NHibernate assembly</title>
+    <authors>John Jeffery</authors>
+    <owners>Software Projects Pty Ltd</owners>
+    <licenseUrl>https://raw.githubusercontent.com/jjeffery/Cesto/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/jjeffery/cesto</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/jjeffery/Cesto/master/cesto.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Cesto library NHibernate assembly</description>
+    <copyright>$copyright$</copyright>
+    <dependencies>
+      <dependency id="Cesto.Core" version="$version$"/>
+      <dependency id="NHibernate" version="4.0.3.4000"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\$configuration$\Cesto.NH.dll" target="lib\net40"/>
+    <file src="bin\$configuration$\Cesto.NH.pdb" target="lib\net40"/>
+    <file src="**\*.cs" target="src"/>
+  </files>
+</package>

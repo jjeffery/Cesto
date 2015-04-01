@@ -77,7 +77,7 @@
   </ItemGroup>
 
   <Target Name="NugetPack" DependsOnTargets="Compile;ArtifactsDir">
-    <NugetPack File="@(NuspecFiles)"
+    <NugetPack File="%(NuspecFiles.Identity)"
                Properties="Configuration=$(BuildConfiguration);copyright=$(CopyrightText)"
                OutputDirectory="$(ArtifactsDir)"
                Symbols="true"

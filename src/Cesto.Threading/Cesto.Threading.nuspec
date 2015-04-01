@@ -1,0 +1,24 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Cesto.Threading</id>
+    <version>$version$</version>
+    <title>Cesto library threading assembly</title>
+    <authors>John Jeffery</authors>
+    <owners>Software Projects Pty Ltd</owners>
+    <licenseUrl>https://raw.githubusercontent.com/jjeffery/Cesto/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/jjeffery/cesto</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/jjeffery/Cesto/master/cesto.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Cesto library threading assembly</description>
+    <copyright>$copyright$</copyright>
+    <dependencies>
+      <dependency id="Cesto.Core" version="$version$"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\$configuration$\Cesto.Threading.dll" target="lib\net40"/>
+    <file src="bin\$configuration$\Cesto.Threading.pdb" target="lib\net40"/>
+    <file src="**\*.cs" target="src"/>
+  </files>
+</package>
