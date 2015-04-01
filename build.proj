@@ -2,40 +2,42 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\build</MSBuildCommunityTasksPath>
-		<ArtifactsDir>$(MSBuildProjectDirectory)\artifacts</ArtifactsDir>
+    <ArtifactsDir>$(MSBuildProjectDirectory)\artifacts</ArtifactsDir>
   </PropertyGroup>
 
-	<Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets"/>
+  <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets"/>
 
-  <!-- Version Number -->
-  <PropertyGroup Condition=" '$(BUILD_NUMBER)' == '' ">
-    <Version>1.0.0.0</Version>
-    <FileVersion>1.0.0.0</FileVersion>
-    <InformationalVersion>1.0.0.0</InformationalVersion>
+  <PropertyGroup>
+    <BuildNumber Condition=" '$(APPVEYOR_BUILD_NUMBER)' != '' ">$(APPVEYOR_BUILD_NUMBER)</BuildNumber>
+    <BuildNumber Condition=" '$(BuildNumber)' == '' ">0</BuildNumber>
+
+    <BuildConfiguration Condition="'$(BuildConfiguration)' == ''">Release</BuildConfiguration>
+
+    <VersionMajor Condition="'$(VersionMajor)' == ''">0</VersionMajor>
+    <VersionMinor Condition="'$(VersionMinor)' == ''">0</VersionMinor>
+    <VersionPatch Condition="'$(VersionPatch)' == ''">0</VersionPatch>
+
+    <AssemblyVersion>$(VersionMajor).$(VersionMinor).0.0</AssemblyVersion>
+    <AssemblyFileVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch).$(BuildNumber)</AssemblyFileVersion>
+    <AssemblyInformationalVersion Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">$(APPVEYOR_BUILD_VERSION)</AssemblyInformationalVersion>
+    <AssemblyInformationalVersion Condition="'$(AssemblyInformationalVersion)' == ''">$(AssemblyFileVersion)</AssemblyInformationalVersion>
+    <PackageVersion>$(AssemblyInformationalVersion)</PackageVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(BUILD_NUMBER)' != '' ">
-    <!-- Build Server Number -->
-    <Version>$(BUILD_NUMBER)</Version>
-    <FileVersion>$(BUILD_NUMBER)</FileVersion>
-    <InformationalVersion>$(BUILD_NUMBER)</InformationalVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(BuildConfiguration)' == '' ">
-    <BuildConfiguration>Release</BuildConfiguration>
-  </PropertyGroup>
-
-  <Target Name="Clean">
-    <DeleteTree Directories="**\obj\**;**\bin\**" />
-  </Target>
-
-  <Target Name="Version">
+  <Target Name="CopyrightText">
     <Time>
       <Output TaskParameter="Year" PropertyName="Year" />
     </Time>
+    <CreateProperty Value="Copyright  © $(Year). All rights reserved.">
+      <Output TaskParameter="Value" PropertyName="CopyrightText"/>
+    </CreateProperty>
 
-    <Message Text="Version: $(Version)"/>
-		<Message Text="FileVersion: $(FileVersion)"/>
+  </Target>
+  
+  <Target Name="AssemblyInfo" DependsOnTargets="CopyrightText">
+    <Message Text="AssemblyVersion: $(AssemblyVersion)"/>
+    <Message Text="AssemblyFileVersion: $(AssemblyFileVersion)"/>
+    <Message Text="AssemblyFileVersion: $(AssemblyInformationalVersion)"/>
 
     <Attrib Files="$(MSBuildProjectDirectory)\GlobalAssemblyInfo.cs" ReadOnly="False" />
 
@@ -46,32 +48,42 @@
                   AssemblyCopyright="Copyright © $(Year). All rights reserved."
                   AssemblyProduct="Cesto Library"
                   AssemblyConfiguration="$(BuildConfiguration)"
-                  AssemblyVersion="$(Version)"
-                  AssemblyFileVersion="$(FileVersion)"
-                  AssemblyInformationalVersion="$(InformationalVersion)" />
+                  AssemblyVersion="$(AssemblyVersion)"
+                  AssemblyFileVersion="$(AssemblyFileVersion)"
+                  AssemblyInformationalVersion="$(AssemblyInformationalVersion)"/>
   </Target>
 
   <!-- Projects to Build -->
   <ItemGroup>
-    <ProjectFiles Include="$(MSBuildProjectDirectory)\**\*.sln">
+    <ProjectFiles Include="$(MSBuildProjectDirectory)\Cesto.sln">
       <Properties>Configuration=$(BuildConfiguration);FormalBuild=true</Properties>
     </ProjectFiles>
   </ItemGroup>
 
-  <Target Name="Compile" DependsOnTargets="Clean;Version">
+  <Target Name="Clean">
+    <MSBuild Projects="@(ProjectFiles)" Targets="Clean" />
+  </Target>
+
+  <Target Name="Compile" DependsOnTargets="Clean;AssemblyInfo">
     <MSBuild Projects="@(ProjectFiles)" />
   </Target>
 
-	<Target Name="ArtifactsDir">
-		<MakeDir Directories="$(ArtifactsDir)"/>
-	</Target>
+  <Target Name="ArtifactsDir">
+    <MakeDir Directories="$(ArtifactsDir)"/>
+  </Target>
 
-	<Target Name="NugetPack" DependsOnTargets="Compile;ArtifactsDir">
-		<NugetPack File="$(MSBuildProjectDirectory)\src\Cesto\Cesto.csproj" 
-							 Properties="Configuration=$(BuildConfiguration)"
-							 OutputDirectory="$(ArtifactsDir)"
-							 ToolPath="$(MSBuildProjectDirectory)\.nuget"/>
-	</Target>
+  <ItemGroup>
+    <NuspecFiles Include="$(MSBuildProjectDirectory)\src\*\Cesto.*.nuspec"/>
+  </ItemGroup>
+
+  <Target Name="NugetPack" DependsOnTargets="Compile;ArtifactsDir">
+    <NugetPack File="@(NuspecFiles)"
+               Properties="Configuration=$(BuildConfiguration);copyright=$(CopyrightText)"
+               OutputDirectory="$(ArtifactsDir)"
+               Symbols="true"
+               ToolPath="$(MSBuildProjectDirectory)\.nuget"
+               Version="$(PackageVersion)"/>
+  </Target>
 
   <Target Name="Build">
     <CallTarget Targets="NugetPack" />

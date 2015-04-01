@@ -3,10 +3,17 @@
 
 version: 0.4.0.{build}
 
+# TODO: figure out how to parse from the version number in msbuild
+environment:
+  VersionMajor: 0
+  VersionMinor: 4
+  VersionPatch: 0
+
 configuration: Release
 
 build:
-  project: Cesto.sln
-  publish_nuget: true
-  publish_nuget_symbols: true
-  verbosity: minimal
+  project: build.proj
+  verbosity: normal
+
+artifacts:
+  path: '*.nupkg'
