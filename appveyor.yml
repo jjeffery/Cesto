@@ -17,3 +17,11 @@ build:
 
 artifacts:
   path: 'artifacts\*.nupkg'
+
+deploy:
+  provider: NuGet
+  server: https://ci.appveyor.com/nuget/jjeffery-5hwiu0ns2uj6
+  api_key:
+    secure: PGt5ff4aCDC/9LtBa9EJkyOzN9kt2pLAMV9dLi/uUUA=
+  skip_symbols: true
+  artifact: 'artifacts\*.nupkg'
