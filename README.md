@@ -4,6 +4,8 @@ Cesto
 A collection of useful .NET utilities. These are classes that I have used in a
 number of projects.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/9b1hos32x8gl1lpf?svg=true)](https://ci.appveyor.com/project/jjeffery/cesto)
+
 What's In Cesto
 ---------------
 
