@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\ConfigTests.cs" />
+    <Compile Include="Config\XmlStorageTests.cs" />
     <Compile Include="Core\DisposableActionTests.cs" />
     <Compile Include="Core\DisposableCollectionTests.cs" />
     <Compile Include="Core\DisposableExtensionsTests.cs" />

@@ -143,10 +143,6 @@ namespace Cesto.Config
         /// <para>
         /// This value is initially set to a memory only storage. This is useful for unit testing.
         /// </para>
-        /// <para>
-        /// If the <see cref="ConfigFacility"/> is registered with the Castle Windsor container,
-        /// then this storage will be automatically set to the component registered with the container.
-        /// </para>
         /// </remarks>
         public static IConfigStorage Storage = new MemoryStorage();
 

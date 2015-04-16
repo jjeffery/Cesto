@@ -50,10 +50,12 @@
     <Compile Include="Config\Storage\ConfigValue.cs" />
     <Compile Include="Config\Storage\IConfigStorage.cs" />
     <Compile Include="Config\Storage\MemoryStorage.cs" />
+    <Compile Include="Config\Storage\XmlStorage.cs" />
     <Compile Include="Config\StringParameter.cs" />
     <Compile Include="Config\TimeSpanExtensions.cs" />
     <Compile Include="Config\TimeSpanParameter.cs" />
     <Compile Include="Config\UrlParameter.cs" />
+    <Compile Include="Internal\XmlConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
