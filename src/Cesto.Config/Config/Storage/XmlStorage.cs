@@ -1,21 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Xml;
 using System.Xml.Serialization;
 using Cesto.Internal;
 
 namespace Cesto.Config.Storage
 {
-	public class XmlStorage : IConfigStorage
+	/// <summary>
+	/// Provides a file based configuration parameter storage. Parameters are stored
+	/// using a simple XML file format.
+	/// </summary>
+	/// <remarks>
+	/// This class inherits from <see cref="MemoryStorage"/>, which provides a caching
+	/// mechanism. If the configuration does not change, configuration parameters are
+	/// cached in memory.
+	/// </remarks>
+	public class XmlStorage : MemoryStorage
+	{
+		public XmlStorage(string filePath) : base(new XmlStorageHelper(filePath))
+		{
+		}
+	}
+
+	internal class XmlStorageHelper : IConfigStorage
 	{
 		public readonly string FilePath;
+		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
 		/// <summary>
 		/// Creates a configuration storage that persists itself as an XML file.
 		/// </summary>
 		/// <param name="filePath">File path of the XML configuration file</param>
-		public XmlStorage(string filePath)
+		public XmlStorageHelper(string filePath)
 		{
 			FilePath = Verify.ArgumentNotNull(filePath, "filePath");
 			IsReadOnly = false;
@@ -23,46 +41,70 @@ namespace Cesto.Config.Storage
 
 		public ConfigValue GetValue(ConfigParameter parameter)
 		{
-			var xmlConfig = LoadData();
-			var item = xmlConfig.GetItem(parameter.Name);
-			if (item != null)
+			_lock.EnterReadLock();
+			try
 			{
-				return new ConfigValue(parameter, item.Value, true);
+				var xmlConfig = LoadData();
+				var item = xmlConfig.GetItem(parameter.Name);
+				if (item != null)
+				{
+					return new ConfigValue(parameter, item.Value, true);
+				}
+				return new ConfigValue(parameter, null, false);
 			}
-			return new ConfigValue(parameter, null, false);
+			finally
+			{
+				_lock.ExitReadLock();
+			}
 		}
 
 		public ConfigValue[] GetValues(params ConfigParameter[] parameters)
 		{
-			var xmlConfig = LoadData();
-			var values = new ConfigValue[parameters.Length];
-			for (var index = 0; index < parameters.Length; ++index)
+			_lock.EnterReadLock();
+			try
 			{
-				var parameter = parameters[index];
-				var item = xmlConfig.GetItem(parameter.Name);
-				ConfigValue value;
-				if (item != null)
+				var xmlConfig = LoadData();
+				var values = new ConfigValue[parameters.Length];
+				for (var index = 0; index < parameters.Length; ++index)
 				{
-					value = new ConfigValue(parameter, item.Value, true);
+					var parameter = parameters[index];
+					var item = xmlConfig.GetItem(parameter.Name);
+					ConfigValue value;
+					if (item != null)
+					{
+						value = new ConfigValue(parameter, item.Value, true);
+					}
+					else
+					{
+						value = new ConfigValue(parameter, null, false);
+					}
+					values[index] = value;
 				}
-				else
-				{
-					value = new ConfigValue(parameter, null, false);
-				}
-				values[index] = value;
+				return values;
 			}
-			return values;
+			finally
+			{
+				_lock.ExitReadLock();
+			}
 		}
 
 		public bool IsReadOnly { get; private set; }
 
 		public void SetValue(ConfigParameter parameter, string value)
 		{
-			var xmlConfig = LoadData();
-			var item = xmlConfig.GetItem(parameter.Name, create: true);
-			item.Value = value;
-			item.Type = parameter.ParameterType;
-			SaveData(xmlConfig);
+			_lock.EnterWriteLock();
+			try
+			{
+				var xmlConfig = LoadData();
+				var item = xmlConfig.GetItem(parameter.Name, create: true);
+				item.Value = value;
+				item.Type = parameter.ParameterType;
+				SaveData(xmlConfig);
+			}
+			finally
+			{
+				_lock.ExitWriteLock();
+			}
 		}
 
 		public void Refresh()

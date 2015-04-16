@@ -8,7 +8,7 @@ using Cesto.Config.Storage;
 namespace Cesto.Internal
 {
 	/// <summary>
-	/// Used by <see cref="XmlStorage"/> for serializing configuration settings
+	/// Used by <see cref="XmlStorageHelper"/> for serializing configuration settings
 	/// </summary>
 	[XmlRoot("config")]
 	public class XmlConfig

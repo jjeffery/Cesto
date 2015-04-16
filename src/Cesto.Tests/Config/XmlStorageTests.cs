@@ -22,7 +22,7 @@ namespace Cesto.Tests.Config
 			{
 				File.Delete(_filePath);
 			}
-			ConfigParameter.Storage = new MemoryStorage(new XmlStorage(_filePath));
+			ConfigParameter.Storage = new XmlStorage(_filePath);
 		}
 
 		[TearDown]
