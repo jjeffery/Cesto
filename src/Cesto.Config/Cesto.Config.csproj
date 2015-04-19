@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -47,6 +48,7 @@
     <Compile Include="Config\DateParameter.cs" />
     <Compile Include="Config\IConfigParameter.cs" />
     <Compile Include="Config\Int32Parameter.cs" />
+    <Compile Include="Config\Storage\AppSettingsStorage.cs" />
     <Compile Include="Config\Storage\ConfigValue.cs" />
     <Compile Include="Config\Storage\IConfigStorage.cs" />
     <Compile Include="Config\Storage\MemoryStorage.cs" />
