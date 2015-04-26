@@ -1,0 +1,29 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Cesto.SelfHost.Config</id>
+    <version>$version$</version>
+    <title>Cesto self-host UI for config parameters</title>
+    <authors>John Jeffery</authors>
+    <owners>Software Projects Pty Ltd</owners>
+    <licenseUrl>https://raw.githubusercontent.com/jjeffery/Cesto/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/jjeffery/cesto</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/jjeffery/Cesto/master/cesto.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+      Provides a WinForms UI for displaying and editing configuration paramters.
+      Useful for self-host applications.
+    </description>
+    <copyright>$copyright$</copyright>
+    <dependencies>
+      <dependency id="Cesto.Core" version="$version$"/>
+      <dependency id="Cesto.Config" version="$version$"/>
+      <dependency id="Cesto.SelfHost" version="$version$"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\$configuration$\Cesto.SelfHost.Config.dll" target="lib\net40"/>
+    <file src="bin\$configuration$\Cesto.SelfHost.Config.pdb" target="lib\net40"/>
+    <file src="**\*.cs" target="src"/>
+  </files>
+</package>

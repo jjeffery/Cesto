@@ -37,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6B838C6A-3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cesto.NH", "src\Cesto.NH\Cesto.NH.csproj", "{CABFD913-91AD-41AB-84E0-7AE11155A8F8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cesto.SelfHost.Config", "src\Cesto.SelfHost.Config\Cesto.SelfHost.Config.csproj", "{E2629DC5-6680-4FB7-BCD4-754048EE4E92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,10 @@ Global
 		{CABFD913-91AD-41AB-84E0-7AE11155A8F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CABFD913-91AD-41AB-84E0-7AE11155A8F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CABFD913-91AD-41AB-84E0-7AE11155A8F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2629DC5-6680-4FB7-BCD4-754048EE4E92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2629DC5-6680-4FB7-BCD4-754048EE4E92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2629DC5-6680-4FB7-BCD4-754048EE4E92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2629DC5-6680-4FB7-BCD4-754048EE4E92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,5 +89,6 @@ Global
 		{E21873FA-DD81-42B1-864D-2CB7A3895645} = {11567940-630A-4B8D-B144-3094D8957854}
 		{44A60CED-FD1D-43BD-8022-9923B1D62D32} = {11567940-630A-4B8D-B144-3094D8957854}
 		{CABFD913-91AD-41AB-84E0-7AE11155A8F8} = {11567940-630A-4B8D-B144-3094D8957854}
+		{E2629DC5-6680-4FB7-BCD4-754048EE4E92} = {11567940-630A-4B8D-B144-3094D8957854}
 	EndGlobalSection
 EndGlobal
