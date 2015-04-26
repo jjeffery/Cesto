@@ -38,8 +38,11 @@ namespace Cesto.Tests
         public void Name_defaultValue_and_description()
         {
             var param = new StringParameter("name")
-                .With(with => with.DefaultValue("default-value")
-                                  .Description("The description"));
+                .With(p =>
+                {
+	                p.DefaultValue("default-value");
+	                p.Description("The description");
+                });
 
             Assert.AreEqual("name", param.Name);
             Assert.AreEqual("default-value", param.Extra.DefaultValue);
@@ -138,18 +141,24 @@ namespace Cesto.Tests
 
         public void ScratchPad()
         {
-            Int32Parameter param = new Int32Parameter("name")
-                .With(p => p.Description("Some description")
-                            .ValidRange(1, 10)
-                            .DefaultValue(4)
-                            .ChangeAction(DoSomething));            
+	        Int32Parameter param = new Int32Parameter("name")
+		        .With(p =>
+		        {
+			        p.Description("Some description");
+			        p.ValidRange(1, 10);
+			        p.DefaultValue(4);
+			        p.ChangeAction(DoSomething);
+		        });
         }
 
-        public static readonly Int32Parameter testParam = new Int32Parameter("test-param")
-            .With(with => with.Description("Test parameter in Quokka.Core")
-                              .DefaultValue(1)
-                              .ValidRange(1, 10)
-                              .ChangeAction(() => Console.WriteLine("{0} changed to {1}", testParam.Name, testParam.Value)));
+	    public static readonly Int32Parameter testParam = new Int32Parameter("test-param")
+		    .With(p =>
+		    {
+			    p.Description("Test parameter in Quokka.Core");
+			    p.DefaultValue(1);
+			    p.ValidRange(1, 10);
+			    p.ChangeAction(() => Console.WriteLine("{0} changed to {1}", testParam.Name, testParam.Value));
+		    });
 
         private void DoSomething() {}
     }

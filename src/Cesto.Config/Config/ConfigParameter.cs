@@ -117,21 +117,23 @@ namespace Cesto.Config
 
 	    IConfigStorage IConfigParameter.Storage
 	    {
-		    get
-		    {
-			    IConfigStorage storage = null;
-			    if (_storageCallback != null)
-			    {
-				    storage = _storageCallback();
-			    }
-				return storage ?? DefaultStorage;
-		    }
+		    get { return GetStorage(); }
 	    }
 
 	    protected void SetStorage(Func<IConfigStorage> callback)
 	    {
 		    _storageCallback = callback;
 	    }
+
+	    protected IConfigStorage GetStorage()
+	    {
+			IConfigStorage storage = null;
+			if (_storageCallback != null)
+			{
+				storage = _storageCallback();
+			}
+			return storage ?? DefaultStorage;
+		}
 
         protected ConfigParameter(string paramName, string paramType)
         {
@@ -170,15 +172,19 @@ namespace Cesto.Config
         public static readonly ConfigParameterCollection All = new ConfigParameterCollection();
     }
 
-    public interface IConfigParameterBuilder<T>
+	public interface IConfigParameterBuilder
+	{
+		void Description(string description);
+		void ChangeAction(Action callback);
+		void Storage(Func<IConfigStorage> storage);
+	}
+
+	public interface IConfigParameterBuilder<T> : IConfigParameterBuilder
     {
-        IConfigParameterBuilder<T> ChangeAction(Action callback);
-        IConfigParameterBuilder<T> Description(string description);
-        IConfigParameterBuilder<T> DefaultValue(T defaultValue);
-        IConfigParameterBuilder<T> DefaultValue(Func<T> callback);
-        IConfigParameterBuilder<T> DerivedValue(Func<T> callback);
-        IConfigParameterBuilder<T> Validation(Func<T, string> callback);
-	    IConfigParameterBuilder<T> Storage(Func<IConfigStorage> storage);
+        void DefaultValue(T defaultValue);
+        void DefaultValue(Func<T> callback);
+        void DerivedValue(Func<T> callback);
+        void Validation(Func<T, string> callback);
     }
 
     public abstract class ConfigParameter<T, TParameter> : ConfigParameter, IConfigParameter<T>
@@ -218,47 +224,40 @@ namespace Cesto.Config
                 _outer = outer;
             }
 
-            public IConfigParameterBuilder<T> Description(string description)
+            public void Description(string description)
             {
                 _outer.Description = (description ?? string.Empty).Trim();
-                return this;
             }
 
-            public IConfigParameterBuilder<T> DefaultValue(T defaultValue)
+            public void DefaultValue(T defaultValue)
             {
                 _outer._defaultValue = defaultValue;
                 _outer._defaultValueSet = true;
-                return this;
             }
 
-            public IConfigParameterBuilder<T> DefaultValue(Func<T> callback)
+            public void DefaultValue(Func<T> callback)
             {
                 _outer._defaultValueCallback = callback;
-                return this;
             }
 
-            public IConfigParameterBuilder<T> DerivedValue(Func<T> callback)
+            public void DerivedValue(Func<T> callback)
             {
                 _outer._derivedValueCallback = callback;
-                return this;
             }
 
-            public IConfigParameterBuilder<T> Validation(Func<T, string> callback)
+            public void Validation(Func<T, string> callback)
             {
                 _outer._validationCallback = callback;
-                return this;
             }
 
-            public IConfigParameterBuilder<T> ChangeAction(Action callback)
+            public void ChangeAction(Action callback)
             {
                 _outer._changedCallback = callback;
-                return this;
             }
 
-	        public IConfigParameterBuilder<T> Storage(Func<IConfigStorage> callback)
+	        public void Storage(Func<IConfigStorage> callback)
 	        {
 		        _outer.SetStorage(callback);
-		        return this;
 	        } 
         }
 
@@ -275,7 +274,7 @@ namespace Cesto.Config
                 {
                     return _derivedValueCallback();
                 }
-                var configValue = DefaultStorage.GetValue(this);
+                var configValue = GetStorage().GetValue(this);
                 if (configValue.HasValue)
                 {
                     return (T) ConvertFromString(configValue.Value);
@@ -286,7 +285,7 @@ namespace Cesto.Config
 
         bool IConfigParameter.IsReadOnly
         {
-            get { return DefaultStorage.IsReadOnly || _derivedValueCallback != null; }
+            get { return GetStorage().IsReadOnly || _derivedValueCallback != null; }
         }
 
         bool IConfigParameter.IsDerived
@@ -357,14 +356,15 @@ namespace Cesto.Config
                     ConfigParameter = this
                 };
             }
+	        var storage = GetStorage();
             var newValue = ConvertToString(value);
-            var oldValue = DefaultStorage.GetValue(this);
+            var oldValue = storage.GetValue(this);
             if (oldValue.HasValue && oldValue.Value == newValue)
             {
                 // no change, so do nothing
                 return;
             }
-            DefaultStorage.SetValue(this, ConvertToString(value));
+            storage.SetValue(this, ConvertToString(value));
             if (_changedCallback != null)
             {
                 _changedCallback();

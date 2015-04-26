@@ -41,13 +41,13 @@ namespace Cesto.Config
 
     public static class Int32ParameterExtensions
     {
-        public static IConfigParameterBuilder<int> ValidRange(this IConfigParameterBuilder<int> @this, int lowerInclusive, int upperInclusive)
+        public static void ValidRange(this IConfigParameterBuilder<int> @this, int lowerInclusive, int upperInclusive)
         {
-            return @this.Validation(n => n >= lowerInclusive && n <= upperInclusive
-                                           ? null
-                                           : string.Format("Value should be in the range {0} to {1} inclusive",
-                                                           lowerInclusive,
-                                                           upperInclusive));
+	        @this.Validation(n => n >= lowerInclusive && n <= upperInclusive
+		        ? null
+		        : string.Format("Value should be in the range {0} to {1} inclusive",
+			        lowerInclusive,
+			        upperInclusive));
         }
     }
 }
