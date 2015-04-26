@@ -22,13 +22,13 @@ namespace Cesto.Tests.Config
 			{
 				File.Delete(_filePath);
 			}
-			ConfigParameter.Storage = new XmlStorage(_filePath);
+			ConfigParameter.DefaultStorage = new XmlStorage(_filePath);
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			ConfigParameter.Storage = new MemoryStorage();
+			ConfigParameter.DefaultStorage = new MemoryStorage();
 		}
 
 		[Test]
@@ -36,7 +36,7 @@ namespace Cesto.Tests.Config
 		{
 			Assert.AreEqual(0, _int32Parameter.Value);
 			_int32Parameter.Extra.SetValue(42);
-			ConfigParameter.Storage.Refresh();
+			ConfigParameter.DefaultStorage.Refresh();
 			Assert.AreEqual(42, _int32Parameter.Value);
 		}
 	}

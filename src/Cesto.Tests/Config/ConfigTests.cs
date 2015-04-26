@@ -31,7 +31,7 @@ namespace Cesto.Tests
         public void TearDown()
         {
             // clear out any parameters from previous tests
-            ConfigParameter.Storage = new MemoryStorage();
+            ConfigParameter.DefaultStorage = new MemoryStorage();
         }
 
         [Test]

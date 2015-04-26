@@ -16,6 +16,8 @@
 
 #endregion
 
+using Cesto.Config.Storage;
+
 namespace Cesto.Config
 {
     /// <summary>
@@ -82,6 +84,12 @@ namespace Cesto.Config
         /// but passwords, for example, return elided text.
         /// </summary>
         string GetDisplayText();
+
+		/// <summary>
+		/// The <see cref="IConfigStorage"/> used for persistent storage of this 
+		/// configuration parameter.
+		/// </summary>
+		IConfigStorage Storage { get; }
     }
 
     /// <summary>

@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using Cesto.Config;
+using Cesto.Config.Storage;
 
 namespace Cesto.WinForms
 {
@@ -34,7 +30,6 @@ namespace Cesto.WinForms
 				BeginInvoke(new Action(() => SearchTextBox.Focus()));
 				DataGridView.ClearSelection();
 				DataGridView.CurrentCell = null;
-				_dataSource.AddRange(ConfigParameter.All);
 			};
 		}
 
@@ -149,7 +144,45 @@ namespace Cesto.WinForms
 
 		private void RefreshButton_Click(object sender, EventArgs e)
 		{
+			LoadData(true);
+		}
+
+		private void LoadData(bool refresh = false)
+		{
+			var storages = new Dictionary<IConfigStorage, List<ConfigParameter>>();
+			foreach (ConfigParameter configParameter in ConfigParameter.All)
+			{
+				var storage = ((IConfigParameter)configParameter).Storage;
+
+				List<ConfigParameter> list;
+				if (!storages.TryGetValue(storage, out list))
+				{
+					list = new List<ConfigParameter>();
+					storages.Add(storage, list);
+				}
+			}
+
+			if (refresh)
+			{
+				foreach (var storage in storages.Keys)
+				{
+					storage.Refresh();
+				}
+			}
+
+			foreach (var item in storages)
+			{
+				var storage = item.Key;
+				var list = item.Value;
+				storage.GetValues(list.ToArray());
+			}
+
 			_dataSource.ReplaceContents(ConfigParameter.All);
+		}
+
+		private void ListConfigView_Load(object sender, EventArgs e)
+		{
+			LoadData();
 		}
 	}
 }

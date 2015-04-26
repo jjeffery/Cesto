@@ -30,6 +30,7 @@
 		{
 			this.TopPanel = new System.Windows.Forms.FlowLayoutPanel();
 			this.SearchLabel = new System.Windows.Forms.Label();
+			this.SearchTextBox = new Quokka.WinForms.Config.SearchTextBox();
 			this.ClearSearchTextButton = new System.Windows.Forms.Button();
 			this.EditButton = new System.Windows.Forms.Button();
 			this.RefreshButton = new System.Windows.Forms.Button();
@@ -38,7 +39,6 @@
 			this.ValueColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ParameterTypeColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.DescriptionColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.SearchTextBox = new Quokka.WinForms.Config.SearchTextBox();
 			this.TopPanel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.DataGridView)).BeginInit();
 			this.SuspendLayout();
@@ -69,6 +69,17 @@
 			this.SearchLabel.Size = new System.Drawing.Size(80, 25);
 			this.SearchLabel.TabIndex = 2;
 			this.SearchLabel.Text = "Search";
+			// 
+			// SearchTextBox
+			// 
+			this.SearchTextBox.Anchor = System.Windows.Forms.AnchorStyles.Left;
+			this.SearchTextBox.Location = new System.Drawing.Point(104, 12);
+			this.SearchTextBox.Margin = new System.Windows.Forms.Padding(6);
+			this.SearchTextBox.Name = "SearchTextBox";
+			this.SearchTextBox.Size = new System.Drawing.Size(506, 31);
+			this.SearchTextBox.TabIndex = 1;
+			this.SearchTextBox.DownKeyPressed += new System.EventHandler(this.SearchTextBox_DownKeyPressed);
+			this.SearchTextBox.TextChanged += new System.EventHandler(this.SearchTextBox_TextChanged);
 			// 
 			// ClearSearchTextButton
 			// 
@@ -166,17 +177,6 @@
 			this.DescriptionColumn.Name = "DescriptionColumn";
 			this.DescriptionColumn.ReadOnly = true;
 			// 
-			// SearchTextBox
-			// 
-			this.SearchTextBox.Anchor = System.Windows.Forms.AnchorStyles.Left;
-			this.SearchTextBox.Location = new System.Drawing.Point(104, 12);
-			this.SearchTextBox.Margin = new System.Windows.Forms.Padding(6);
-			this.SearchTextBox.Name = "SearchTextBox";
-			this.SearchTextBox.Size = new System.Drawing.Size(506, 31);
-			this.SearchTextBox.TabIndex = 1;
-			this.SearchTextBox.DownKeyPressed += new System.EventHandler(this.SearchTextBox_DownKeyPressed);
-			this.SearchTextBox.TextChanged += new System.EventHandler(this.SearchTextBox_TextChanged);
-			// 
 			// ListConfigView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -185,6 +185,7 @@
 			this.Controls.Add(this.TopPanel);
 			this.Name = "ListConfigView";
 			this.Size = new System.Drawing.Size(1432, 1098);
+			this.Load += new System.EventHandler(this.ListConfigView_Load);
 			this.TopPanel.ResumeLayout(false);
 			this.TopPanel.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.DataGridView)).EndInit();
