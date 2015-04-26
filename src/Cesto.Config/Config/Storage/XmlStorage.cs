@@ -115,13 +115,13 @@ namespace Cesto.Config.Storage
 		{
 			if (!File.Exists(FilePath))
 			{
-				return new XmlConfig { Items = new List<XmlConfigItem>()};
+				return new XmlConfig {Items = new List<XmlConfigItem>()};
 			}
 
 			using (var stream = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 			{
 				var serializer = new XmlSerializer(typeof (XmlConfig));
-				var xmlConfig = (XmlConfig)serializer.Deserialize(stream);
+				var xmlConfig = (XmlConfig) serializer.Deserialize(stream);
 				return xmlConfig;
 			}
 		}
@@ -132,8 +132,7 @@ namespace Cesto.Config.Storage
 			using (var stream = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.None))
 			{
 				var serializer = new XmlSerializer(typeof (XmlConfig));
-				var xmlWriterSettings = new XmlWriterSettings
-				{
+				var xmlWriterSettings = new XmlWriterSettings {
 					Indent = true,
 				};
 				using (var xmlWriter = XmlWriter.Create(stream, xmlWriterSettings))

@@ -13,8 +13,7 @@ namespace Cesto.Internal
 	[XmlRoot("config")]
 	public class XmlConfig
 	{
-		[XmlElement("item")]
-		public List<XmlConfigItem> Items;
+		[XmlElement("item")] public List<XmlConfigItem> Items;
 
 		public XmlConfigItem GetItem(string name, bool create = false)
 		{
@@ -36,13 +35,10 @@ namespace Cesto.Internal
 
 	public class XmlConfigItem
 	{
-		[XmlAttribute("name")]
-		public string Name;
+		[XmlAttribute("name")] public string Name;
 
-		[XmlAttribute("type")]
-		public string Type;
+		[XmlAttribute("type")] public string Type;
 
-		[XmlText]
-		public string Value;
+		[XmlText] public string Value;
 	}
 }
