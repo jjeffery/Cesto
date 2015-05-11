@@ -131,7 +131,10 @@ namespace Cesto.Threading
 		/// Associate an action with a <see cref="WaitHandle"/>. The action is
 		/// called whenever the <see cref="WaitHandle"/> is set.
 		/// </summary>
-		public void SetAction(WaitHandle waitHandle, Action action)
+		/// <remarks>
+		/// TODO: currently limited to one action per wait handle.
+		/// </remarks>
+		public IDisposable SetAction(WaitHandle waitHandle, Action action)
 		{
 			if (IsOnWorkerThread())
 			{
@@ -140,6 +143,47 @@ namespace Cesto.Threading
 			else
 			{
 				Post(() => DoSetAction(waitHandle, action));
+			}
+
+			// Don't use a DisposableAction here, as it will implicitly
+			// retain the action closure as well. Play it safe and return
+			// a purpose-built object.
+			return new RemoveActionDisposable(this, waitHandle);
+		}
+
+		private class RemoveActionDisposable : IDisposable
+		{
+			private readonly WorkThread _workThread;
+			private readonly WaitHandle _waitHandle;
+
+			public RemoveActionDisposable(WorkThread workThread, WaitHandle waitHandle)
+			{
+				_workThread = workThread;
+				_waitHandle = waitHandle;
+			}
+
+			public void Dispose()
+			{
+				if (_workThread.IsOnWorkerThread())
+				{
+					_workThread.DoRemoveAction(_waitHandle);
+				}
+				else
+				{
+					_workThread.Post(() => _workThread.DoRemoveAction(_waitHandle));
+				}
+			}
+		}
+
+		private void RemoveAction(WaitHandle waitHandle)
+		{
+			if (IsOnWorkerThread())
+			{
+				DoRemoveAction(waitHandle);
+			}
+			else
+			{
+				Post(() => DoRemoveAction(waitHandle));
 			}
 		}
 
@@ -251,6 +295,13 @@ namespace Cesto.Threading
 			{
 				_waitHandleToAction.Add(waitHandle, action);
 			}
+			_waitHandles = null;
+		}
+
+		private void DoRemoveAction(WaitHandle waitHandle)
+		{
+			CheckWorkerThread();
+			_waitHandleToAction.Remove(waitHandle);
 			_waitHandles = null;
 		}
 
