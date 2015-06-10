@@ -1,13 +1,13 @@
 # appveyor configuration file.
 # See http://www.appveyor.com/docs/appveyor-yml
 
-version: 0.5.2.{build}
+version: 0.6.0.{build}
 
 # TODO: figure out how to parse from the version number in msbuild
 environment:
   VersionMajor: 0
-  VersionMinor: 5
-  VersionPatch: 2
+  VersionMinor: 6
+  VersionPatch: 0
 
 configuration: Release
 
