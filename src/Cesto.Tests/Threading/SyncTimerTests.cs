@@ -85,10 +85,9 @@ namespace Cesto.Tests.Threading
 			var syncTimer = new SyncTimer(() => {
 				timerExpired = true;
 			});
-			syncTimer.Start(120);
-			await Task.Delay(50);
+			syncTimer.Start(500);
 			syncTimer.Dispose();
-			await Task.Delay(120);
+			await Task.Delay(600);
 			Assert.AreEqual(false, timerExpired);
 		}
 
