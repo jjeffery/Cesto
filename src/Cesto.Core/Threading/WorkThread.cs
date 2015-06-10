@@ -2,58 +2,116 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 using Cesto.Internal;
 
 namespace Cesto.Threading
 {
 	/// <summary>
-	/// Puts as much of the worker thread stuff in a separate class to
-	/// keep the main PLC processing class simpler.
+	/// A <see cref="WorkThread"/> operates as a background thread, and operates a message pump
+	/// which is compatible with async/await processing.
 	/// </summary>
 	public class WorkThread : IDisposable
 	{
 		private Thread _thread;
 		private readonly WaitQueue<Action> _queue = new WaitQueue<Action>();
 		private readonly object _lockObject = new object();
-		private bool _stopRequested;
-		private bool _stopImmediately;
+		private volatile bool _stopImmediately;
 		private static readonly ThreadLocal<WorkThread> CurrentWorkerThread = new ThreadLocal<WorkThread>();
 		private readonly Dictionary<WaitHandle, Action> _waitHandleToAction = new Dictionary<WaitHandle, Action>();
-		private readonly TimerQueue _timerQueue;
 		private WaitHandle[] _waitHandles;
 		private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
+		/// <summary>
+		/// Event that is raised shortly after the work thread is started.
+		/// </summary>
 		public event EventHandler Started;
+
+		/// <summary>
+		/// Event that is raised just before the work thread stops.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// Raising this event is the last thing the worker thread does before exiting its thread.
+		/// Any attempt to <see cref="Post"/> or <see cref="Send"/> to the worker thread will fail
+		/// with an <see cref="InvalidOperationException"/>.
+		/// </para>
+		/// <para>
+		/// This event should be used with caution. No attempt is made to recover if this event
+		/// handler throws an exception.
+		/// </para>
+		/// </remarks>
 		public event EventHandler Stopped;
+
+		/// <summary>
+		/// Event that is raised when the work thread stops because of an unhandled exception.
+		/// </summary>
+		/// <remarks>
+		/// If an event handler is able to set the <see cref="WorkThreadExceptionEventArgs.Handled"/>
+		/// property, then the work thread will continue operation, otherwise it will terminate.
+		/// </remarks>
 		public event EventHandler<WorkThreadExceptionEventArgs> ExceptionThrown;
+
+		/// <summary>
+		/// The work thread Synchronization context
+		/// </summary>
 		public readonly SynchronizationContext SynchronizationContext;
 
+		/// <summary>
+		/// Cancellation token associated with the work thread. As soon as the work thread is requested to
+		/// stop, this cancellation token is marked as cancellation requested.
+		/// </summary>
 		public CancellationToken CancellationToken
 		{
 			get { return _cancellationTokenSource.Token; }
 		}
 
+		/// <summary>
+		/// Constructs a new <see cref="WorkThread"/> object.
+		/// </summary>
 		public WorkThread()
 		{
 			SynchronizationContext = new WorkerThreadSynchronizationContext(this);
-			_timerQueue = new TimerQueue(SynchronizationContext);
 		}
 
-		public Exception Exception { get; set; }
+		/// <summary>
+		/// If the work thread terminates because of an unhandled exception, this property
+		/// will be that exception. Otherwise <c>null</c>.
+		/// </summary>
+		public Exception Exception { get; private set; }
 
+		/// <summary>
+		/// If the currently executing thread is a work thread, then this property will
+		/// return the work thread instance. Otherwise it will return <c>null</c>.
+		/// </summary>
 		public static WorkThread Current
 		{
 			get { return CurrentWorkerThread.Value; }
 		}
 
+		/// <summary>
+		/// The name of the work thread.
+		/// </summary>
+		/// <remarks>
+		/// The underlying thread will receive this name, however this property should be set
+		/// prior to calling <see cref="Start"/>. If it is set after the thread is started, the
+		/// underlying thread will not receive this name.
+		/// </remarks>
 		public string Name { get; set; }
 
+		/// <summary>
+		/// Is the work thread alive.
+		/// </summary>
 		public bool IsAlive
 		{
 			get { return _thread != null && _thread.IsAlive; }
 		}
 
+		/// <summary>
+		/// Start the work thread.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">
+		/// The work thread has already been started.
+		/// </exception>
 		public void Start()
 		{
 			lock (_lockObject)
@@ -63,44 +121,41 @@ namespace Cesto.Threading
 					throw new InvalidOperationException("Thread has been started");
 				}
 				_cancellationTokenSource = new CancellationTokenSource();
-				_thread = new Thread(ThreadMain) {IsBackground = true};
+				_thread = new Thread(ThreadMain) { IsBackground = true };
 				if (!string.IsNullOrEmpty(Name))
 				{
 					_thread.Name = Name;
 				}
-				_stopRequested = false;
 				Exception = null;
 				_thread.Start();
 			}
 		}
 
 		/// <summary>
-		/// Stops the work thread. The thread will not empty its action queue before stopping
+		/// Stops the work thread. The thread will not empty its action queue before stopping.
 		/// </summary>
 		public void Dispose()
 		{
-			// TODO: need to be better about stopping
+			_stopImmediately = true;
 			RequestStop();
 		}
 
 		/// <summary>
-		/// Requests the worker thread to stop. The thread will empty its action queue before stopping
+		/// Requests the worker thread to stop. The thread will empty its action queue before stopping.
 		/// </summary>
 		public void RequestStop()
 		{
 			_cancellationTokenSource.Cancel();
-
-			// Can be called from any thread
-			if (IsOnWorkerThread())
-			{
-				DoRequestStop();
-			}
-			else
-			{
-				Post(() => DoRequestStop());
-			}
 		}
 
+		/// <summary>
+		/// Blocks the current thread and waits for the worker thread to stop, or the timeout occurs. The worker thread will
+		/// empty its action queue before stopping.
+		/// </summary>
+		/// <param name="milliseconds">Number of milliseconds to wait before giving up.</param>
+		/// <returns>
+		/// Returns <c>true</c> if the worker thread stopped in the time required, <c>false</c> otherwise.
+		/// </returns>
 		public bool Join(int milliseconds = Timeout.Infinite)
 		{
 			if (Current == this)
@@ -121,18 +176,18 @@ namespace Cesto.Threading
 			return thread.Join(milliseconds);
 		}
 
-		public void Stop()
-		{
-			RequestStop();
-			Join();
-		}
-
 		/// <summary>
 		/// Associate an action with a <see cref="WaitHandle"/>. The action is
 		/// called whenever the <see cref="WaitHandle"/> is set.
 		/// </summary>
+		/// <returns>
+		/// Returns an <see cref="IDisposable"/>, which can be used for cancelling the
+		/// association. Once the Dispose method is called, the action will no longer be
+		/// called when the wait handle is set.
+		/// </returns>
 		/// <remarks>
-		/// TODO: currently limited to one action per wait handle.
+		/// If the <see cref="WaitHandle"/> needs to be manually reset, it is the responsibility of
+		/// the action to do this, otherwise an infinte loop will result.
 		/// </remarks>
 		public IDisposable SetAction(WaitHandle waitHandle, Action action)
 		{
@@ -175,81 +230,31 @@ namespace Cesto.Threading
 			}
 		}
 
-		private void RemoveAction(WaitHandle waitHandle)
-		{
-			if (IsOnWorkerThread())
-			{
-				DoRemoveAction(waitHandle);
-			}
-			else
-			{
-				Post(() => DoRemoveAction(waitHandle));
-			}
-		}
-
+		/// <summary>
+		/// Post an action to the work thread, but do not wait for it to be executed.
+		/// </summary>
+		/// <param name="action">Action to be performed on the work thread.</param>
 		public void Post(Action action)
 		{
-			// Can be called from any thread
+			Verify.ArgumentNotNull(action, "action");
+			CheckAlive();
 			_queue.Enqueue(action);
 		}
 
-		public void Post(Func<Task> action)
-		{
-			var asyncAction = new Action(async () => AsyncAction(action));
-			_queue.Enqueue(asyncAction);
-		}
-
-		private async void AsyncAction(Func<Task> action)
-		{
-			Exception exception = null;
-
-			if (action != null)
-			{
-				try
-				{
-					await action();
-				}
-				catch (Exception ex)
-				{
-					exception = ex;
-				}
-			}
-
-			if (exception != null)
-			{
-				var exceptionThrown = ExceptionThrown;
-				if (exceptionThrown != null)
-				{
-					var eventArgs = new WorkThreadExceptionEventArgs(exception);
-					exceptionThrown(this, eventArgs);
-					if (eventArgs.Handled)
-					{
-						exception = null;
-					}
-				}
-			}
-
-			if (exception != null)
-			{
-				// unhandled exception, cannot throw because this would terminate the appdomain
-				Exception = exception;
-				_stopRequested = true;
-				_stopImmediately = true;
-			}
-		}
-
+		/// <summary>
+		/// Send an action to the work thread and wait for it to be executed.
+		/// </summary>
+		/// <param name="action">Action to perform.</param>
 		public void Send(Action action)
 		{
+			Verify.ArgumentNotNull(action, "action");
 			if (Current == this)
 			{
 				action();
 			}
 			else
 			{
-				if (!IsAlive)
-				{
-					throw new InvalidOperationException("Worker thread has stopped");
-				}
+				CheckAlive();
 				using (var wait = new ManualResetEvent(false))
 				{
 					// ReSharper disable AccessToDisposedClosure
@@ -259,7 +264,7 @@ namespace Cesto.Threading
 					});
 					// ReSharper restore AccessToDisposedClosure
 
-					for (;;)
+					for (; ; )
 					{
 						if (wait.WaitOne(500))
 						{
@@ -274,13 +279,15 @@ namespace Cesto.Threading
 			}
 		}
 
-		public IDisposable Schedule(TimeSpan timeout, Action action)
-		{
-			return _timerQueue.Schedule(timeout, action);
-		}
-
+		/// <summary>
+		/// Send a function to the work thread and wait for the result.
+		/// </summary>
+		/// <typeparam name="T">Function return type</typeparam>
+		/// <param name="func">Function to call on the work thread</param>
+		/// <returns>Returns the return value of the function.</returns>
 		public T Send<T>(Func<T> func)
 		{
+			Verify.ArgumentNotNull(func, "func");
 			T result = default(T);
 			Action action = () => result = func();
 			Send(action);
@@ -314,12 +321,6 @@ namespace Cesto.Threading
 			}
 		}
 
-		private void DoRequestStop()
-		{
-			CheckWorkerThread();
-			_stopRequested = true;
-		}
-
 		private void RaiseStarted()
 		{
 			CheckWorkerThread();
@@ -332,7 +333,6 @@ namespace Cesto.Threading
 
 		private void RaiseStopped()
 		{
-			CheckWorkerThread();
 			var stopped = Stopped;
 			if (stopped != null)
 			{
@@ -357,14 +357,16 @@ namespace Cesto.Threading
 			}
 			finally
 			{
-				RaiseStopped();
-				CurrentWorkerThread.Value = null;
-				_timerQueue.Dispose();
 				_queue.Clear();
+				CurrentWorkerThread.Value = null;
 				lock (_lockObject)
 				{
 					_thread = null;
 				}
+				SynchronizationContext.SetSynchronizationContext(null);
+
+				// Note there is no attempt to recover from exceptions thrown in the event handler.
+				RaiseStopped();
 			}
 		}
 
@@ -372,14 +374,14 @@ namespace Cesto.Threading
 		{
 			CheckWorkerThread();
 			// process events until stop has been requested
-			while (!_stopRequested)
+			while (!_cancellationTokenSource.IsCancellationRequested)
 			{
 				DoOneThing(Timeout.Infinite);
 			}
 
 			// finish the queue of things to do (warning, make sure
 			// this is not an infinite loop).
-			while (!_stopImmediately && DoOneThing(0)) {}
+			while (!_stopImmediately && DoOneThing(0)) { }
 		}
 
 		/// <summary>
@@ -463,47 +465,12 @@ namespace Cesto.Threading
 				throw new InvalidOperationException(message);
 			}
 		}
-	}
 
-	public class WorkerThreadSynchronizationContext : SynchronizationContext
-	{
-		private readonly WorkThread _workThread;
-
-		public WorkerThreadSynchronizationContext(WorkThread workThread)
+		private void CheckAlive()
 		{
-			_workThread = Verify.ArgumentNotNull(workThread, "workerThread");
-		}
-
-		public override SynchronizationContext CreateCopy()
-		{
-			return new WorkerThreadSynchronizationContext(_workThread);
-		}
-
-		public override void Post(SendOrPostCallback d, object state)
-		{
-			_workThread.Post(() => d(state));
-		}
-
-		public override void Send(SendOrPostCallback d, object state)
-		{
-			if (WorkThread.Current == _workThread)
+			if (!IsAlive)
 			{
-				d(state);
-			}
-			else
-			{
-				using (var wait = new ManualResetEvent(false))
-				{
-					// ReSharper disable AccessToDisposedClosure
-					_workThread.Post(() => {
-						d(state);
-
-						wait.Set();
-					});
-					// ReSharper restore AccessToDisposedClosure
-
-					wait.WaitOne();
-				}
+				throw new InvalidOperationException("Worker thread is stopped");
 			}
 		}
 	}

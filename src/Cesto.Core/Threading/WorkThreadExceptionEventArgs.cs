@@ -17,7 +17,9 @@ namespace Cesto.Threading
 		/// </summary>
 		public bool Handled { get; set; }
 
+#pragma warning disable 1591
 		public WorkThreadExceptionEventArgs(Exception exception)
+
 		{
 			Exception = Verify.ArgumentNotNull(exception, "exception");
 		}
